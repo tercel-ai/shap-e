@@ -1,5 +1,5 @@
-from app import http_app, request
-from apimsg import ApiMessage
+from web.app import http_app, request
+from web.apimsg import ApiMessage
 import json
 import time
 import asyncio

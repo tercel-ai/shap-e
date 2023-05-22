@@ -1,6 +1,6 @@
 from flask import Flask, request
 from flask_cors import CORS
-from apimsg import ApiMessage
+from web.apimsg import ApiMessage
 
 http_app = Flask(__name__,)
 CORS(http_app, resources={r'/*': {'origins': '*'}})
