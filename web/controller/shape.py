@@ -3,7 +3,7 @@ from apimsg import ApiMessage
 import json
 import time
 import asyncio
-from create import create_3d, can_create
+from create import create_3d, can_create, generate_ply
 
 def now_full_int():
     return int(time.time()*1000000)
@@ -15,13 +15,16 @@ def shape_create():
     if not can_create():
         return ApiMessage.fail('busy, please wait a moment').to_dict()
     
-    if not data.get('prompt'):
+    prompt = data.get('prompt')
+    if not prompt:
         return ApiMessage.fail('please input a prompt').to_dict()
 
     name = str(now_full_int())
-    filename = name+'.1.ply'
-    asyncio.run(create_3d(data['prompt']))
-    return ApiMessage.success(filename).to_dict()
+    filename = name+'.0.ply'
+    # asyncio.run(create_3d(data['prompt']))
+    generate_ply(prompt, filename)
+    filepath = request.url + 'files/'+filename
+    return ApiMessage.success(filepath).to_dict()
 
 
 @http_app.route("/v1/shape/get-file", methods=['GET'])
