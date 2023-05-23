@@ -1,5 +1,5 @@
 import argparse
-from create import generate_ply
+from entry import generate_ply
 
 parser = argparse.ArgumentParser(description='Generate 3D')
 parser.add_argument('--prompt', type=str, help='prompt word')
