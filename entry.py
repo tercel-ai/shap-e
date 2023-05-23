@@ -19,6 +19,7 @@ rate_limit = int(os.environ.get('SHAPE_FILE_RATE_LIMIT', 1))
 
 last_create_time = time.time()
 run_count = 0
+dir_path = 'statics'
 
 class RateLimitExcepiton(Exception):
     pass
@@ -59,7 +60,7 @@ def generate_ply(prompt:str, filename:str, batch_size=1, guidance_scale=15.0):
 
 
         for i, latent in enumerate(latents):
-            with open(f'statics/{filename}.{i}.ply', 'wb') as f:
+            with open(f'{dir_path}/{filename}.{i}.ply', 'wb') as f:
                 decode_latent_mesh(xm, latent).tri_mesh().write_ply(f)
     
     except Exception as e:
@@ -90,7 +91,8 @@ def clear_files():
     total = len(file_list)
     for i in range(total):
         if time.time()-file_list[i]['create_time'] > expire_time:
-            res = delete_file(file_list[i]['filename'])
+            file_path = os.path.join(dir_path, file_list[i]['filename'])
+            res = delete_file(file_path)
             if res:
                 count += 1
           
@@ -99,7 +101,8 @@ def clear_files():
         file_list = file_list[:10]
         total = len(file_list)
         for i in range(total): 
-            res = delete_file(file_list[i]['filename'])
+            file_path = os.path.join(dir_path, file_list[i]['filename'])
+            res = delete_file(file_path)
             if res:
                 count += 1
     return count
@@ -115,8 +118,6 @@ def delete_file(filepath):
     
 def get_files():
     data = []
-    dir_path = 'statics'
-
     for file_name in os.listdir(dir_path):
         file_path = os.path.join(dir_path, file_name)
         if os.path.isfile(file_path):
@@ -131,8 +132,6 @@ def get_files():
 
 def count_files():
     count = 0
-    dir_path = 'statics'
-
     for file_name in os.listdir(dir_path):
         file_path = os.path.join(dir_path, file_name)
         if os.path.isfile(file_path):

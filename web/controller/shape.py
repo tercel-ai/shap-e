@@ -3,7 +3,7 @@ from web.apimsg import ApiMessage
 import json
 import time
 import asyncio
-from entry import create_3d, can_create, generate_ply, clear_files, get_files
+from entry import create_3d, can_create, generate_ply, clear_files, get_files, dir_path
 
 def now_full_int():
     return int(time.time()*1000000)
@@ -23,7 +23,7 @@ def shape_create():
     filename = name+'.0.ply'
     # asyncio.run(create_3d(data['prompt']))
     generate_ply(prompt, name)
-    filepath = request.host_url + 'statics/'+filename
+    filepath = request.host_url + dir_path +'/'+filename
     return ApiMessage.success(filepath).to_dict()
 
 
@@ -31,7 +31,7 @@ def shape_create():
 def shape_get_file():
     filename = request.args.get('filename', '')
     #todo 
-    filepath = request.host_url + 'statics/'+filename
+    filepath = request.host_url + dir_path +'/'+filename
     return ApiMessage.success(filepath).to_dict()
 
 
