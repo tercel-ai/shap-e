@@ -49,7 +49,7 @@ def generate_ply(prompt:str, filename:str, batch_size=1, guidance_scale=15.0):
 
 
         for i, latent in enumerate(latents):
-            with open(f'files/{filename}.{i}.ply', 'wb') as f:
+            with open(f'statics/{filename}.{i}.ply', 'wb') as f:
                 decode_latent_mesh(xm, latent).tri_mesh().write_ply(f)
     
     except Exception as e:
@@ -69,5 +69,5 @@ def can_create():
     if time.time() - last_create_time > busy_wait_time:
         # todo delete first file
         pass
-    
+
     return len(file_list) < max_files
