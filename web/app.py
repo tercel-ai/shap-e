@@ -2,7 +2,7 @@ from flask import Flask, request
 from flask_cors import CORS
 from web.apimsg import ApiMessage
 
-http_app = Flask(__name__,)
+http_app = Flask(__name__, static_folder='statics')
 CORS(http_app, resources={r'/*': {'origins': '*'}})
 
 

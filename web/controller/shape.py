@@ -22,7 +22,7 @@ def shape_create():
     name = str(now_full_int())
     filename = name+'.0.ply'
     # asyncio.run(create_3d(data['prompt']))
-    generate_ply(prompt, filename)
+    generate_ply(prompt, name)
     filepath = request.url + 'files/'+filename
     return ApiMessage.success(filepath).to_dict()
 
