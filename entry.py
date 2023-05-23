@@ -90,14 +90,19 @@ def clear_files():
     total = len(file_list)
     for i in range(total):
         if time.time()-file_list[i]['create_time'] > expire_time:
-            delete_file(file_list[i]['filename'])
-            del file_list[i]
-                
+            res = delete_file(file_list[i]['filename'])
+            if res:
+                count += 1
+          
     total = len(file_list)
     if total > max_files:
-        for i in range(10): 
-            delete_file(file_list[i]['filename'])
-            del file_list[i]
+        file_list = file_list[:10]
+        total = len(file_list)
+        for i in range(total): 
+            res = delete_file(file_list[i]['filename'])
+            if res:
+                count += 1
+    return count
 
 def delete_file(filepath):
     try:

@@ -37,8 +37,8 @@ def shape_get_file():
 
 @http_app.route("/v1/shape/clear-files", methods=['POST'])
 def shape_clear_files():
-    clear_files()
-    return ApiMessage.success().to_dict()
+    count = clear_files()
+    return ApiMessage.success(count).to_dict()
 
 
 @http_app.route("/v1/shape/show-files", methods=['GET'])
