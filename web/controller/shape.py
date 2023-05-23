@@ -3,7 +3,7 @@ from web.apimsg import ApiMessage
 import json
 import time
 import asyncio
-from create import create_3d, can_create, generate_ply, clear_files, show_files
+from entry import create_3d, can_create, generate_ply, clear_files, get_files
 
 def now_full_int():
     return int(time.time()*1000000)
@@ -43,6 +43,6 @@ def shape_clear_files():
 
 @http_app.route("/v1/shape/show-files", methods=['GET'])
 def shape_show_files():
-    data = show_files()
+    data = get_files()
     return ApiMessage.success(data).to_dict()
 

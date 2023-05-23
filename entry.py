@@ -13,11 +13,11 @@ xm = load_model('transmitter', device=device)
 model = load_model('text300M', device=device)
 diffusion = diffusion_from_config(load_config('diffusion'))
 
-expire_time = 900
-max_files = 100
-file_list = []
+expire_time = int(os.environ.get('SHAPE_FILE_EXPIRE_TIME', 900))
+max_files = int(os.environ.get('SHAPE_FILE_MAX', 100))
+rate_limit = int(os.environ.get('SHAPE_FILE_RATE_LIMIT', 1))
+
 last_create_time = time.time()
-rate_limit = 1
 run_count = 0
 
 class RateLimitExcepiton(Exception):
@@ -29,12 +29,10 @@ def generate_ply(prompt:str, filename:str, batch_size=1, guidance_scale=15.0):
     global run_count
 
     run_count += 1
-    last_create_time = time.time()
-
-    for i in range(batch_size):
-        file_list.append({'filename': f'statics/{filename}.{i}.ply', 'time': time.time()})
 
     try:
+        last_create_time = time.time()
+
         latents = sample_latents(
             batch_size=batch_size,
             model=model,
@@ -65,7 +63,7 @@ def generate_ply(prompt:str, filename:str, batch_size=1, guidance_scale=15.0):
                 decode_latent_mesh(xm, latent).tri_mesh().write_ply(f)
     
     except Exception as e:
-        del file_list[-1*batch_size:]
+        print('generate 3d exception: '+str(e))
 
     finally:
         run_count -= 1
@@ -87,14 +85,16 @@ def can_create():
     return True
 
 def clear_files():
-    count = len(file_list)
-    for i in range(count):
-        if time.time()-file_list[i]['time'] > expire_time:
+    count = 0
+    file_list = get_files()
+    total = len(file_list)
+    for i in range(total):
+        if time.time()-file_list[i]['create_time'] > expire_time:
             delete_file(file_list[i]['filename'])
             del file_list[i]
                 
-    count = len(file_list)
-    if count > max_files:
+    total = len(file_list)
+    if total > max_files:
         for i in range(10): 
             delete_file(file_list[i]['filename'])
             del file_list[i]
@@ -102,11 +102,13 @@ def clear_files():
 def delete_file(filepath):
     try:
         os.remove(filepath)
+        return True
     except OSError as e:
         print(f'can not delete {filepath}: {e.strerror}')
+        return False
 
     
-def show_files():
+def get_files():
     data = []
     dir_path = 'statics'
 
@@ -114,13 +116,21 @@ def show_files():
         file_path = os.path.join(dir_path, file_name)
         if os.path.isfile(file_path):
             create_time = os.path.getctime(file_path)
-            # 将时间戳转换为可读格式
-            readable_time = time.ctime(create_time)
-
             data.append({
                 'filename': file_name,
-                'create_time': create_time,
-                'readable_time': readable_time
+                'create_time': create_time
             })
 
-    return data
+    sorted_data = sorted(data, key=lambda x: x['create_time'])
+    return sorted_data
+
+def count_files():
+    count = 0
+    dir_path = 'statics'
+
+    for file_name in os.listdir(dir_path):
+        file_path = os.path.join(dir_path, file_name)
+        if os.path.isfile(file_path):
+            count += 1
+
+    return count
