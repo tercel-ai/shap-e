@@ -22,10 +22,8 @@ def shape_create():
 
     d = get_record_by_prompt(prompt)
     if d:
-        file_image = d['file_image']
-        d['file_image'] = f"{request.host_url}{file_image}",
-        file_3d = d['file_3d']
-        d['file_3d'] = f"{request.host_url}{file_3d}",
+        d['file_image'] = get_file_url(d['file_image'])
+        d['file_3d'] = get_file_url(d['file_3d'])
         return ApiMessage.success(d).to_dict()
     
     name = str(now_full_int())
@@ -49,11 +47,12 @@ def shape_create():
 def shape_records():
     data = get_records()
     for d in data:
-        file_image = d['file_image']
-        d['file_image'] = f"{request.host_url}{file_image}",
-        file_3d = d['file_3d']
-        d['file_3d'] = f"{request.host_url}{file_3d}",
+        d['file_image'] = get_file_url(d['file_image'])
+        d['file_3d'] = get_file_url(d['file_3d'])
 
     return ApiMessage.success(data).to_dict()
 
+
+def get_file_url(filename:str):
+    return f"{request.host_url}{filename}"
 
