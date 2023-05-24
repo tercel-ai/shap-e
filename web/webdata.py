@@ -24,8 +24,8 @@ def save_record(data:dict):
     try:
         if len(webdata) > max_records:
             d = webdata.pop()
-            delete_file(d['image'])
-            delete_file(d['3dfile'])
+            delete_file(d['file_image'])
+            delete_file(d['file_3d'])
 
         webdata.appendleft(data)
         json_str = json.dumps(list(webdata))
@@ -50,3 +50,23 @@ def get_records():
     if not webdata:
         load_records()
     return list(webdata)
+
+
+def get_record_by_prompt(prompt:str):
+    global webdata
+    if not webdata:
+        load_records()
+        
+    i = -1
+    res = None
+    for index, item in enumerate(webdata):
+        if item['prompt'] == prompt:
+            i = index
+            res = item
+            break
+
+    if i > -1:
+        del webdata[i]
+        save_record(res)
+    
+    return res

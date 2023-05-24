@@ -4,7 +4,7 @@ import json
 import time
 import asyncio
 from entry import can_create, text_to_3d, clear_files, get_files, dir_path
-from web.webdata import save_record, get_records
+from web.webdata import save_record, get_records, get_record_by_prompt
 
 def now_full_int():
     return int(time.time()*1000000)
@@ -20,6 +20,14 @@ def shape_create():
     if not prompt:
         return ApiMessage.fail('please input a prompt').to_dict()
 
+    d = get_record_by_prompt(prompt)
+    if d:
+        file_image = d['file_image']
+        d['file_image'] = f"{request.host_url}{file_image}",
+        file_3d = d['file_3d']
+        d['file_3d'] = f"{request.host_url}{file_3d}",
+        return ApiMessage.success(d).to_dict()
+    
     name = str(now_full_int())
     # asyncio.run(create_3d(prompt, name))
     text_to_3d(prompt, name)
