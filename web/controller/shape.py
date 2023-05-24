@@ -3,7 +3,8 @@ from web.apimsg import ApiMessage
 import json
 import time
 import asyncio
-from entry import create_3d, can_create, generate_ply, clear_files, get_files, dir_path
+from entry import can_create, text_to_3d, clear_files, get_files, dir_path
+from web.webdata import save_record, get_records
 
 def now_full_int():
     return int(time.time()*1000000)
@@ -11,38 +12,33 @@ def now_full_int():
 
 @http_app.route("/v1/shape/create", methods=['POST'])
 def shape_create():
-    data = json.loads(request.data)
+    param = json.loads(request.data)
     if not can_create():
         return ApiMessage.fail('busy, please wait a moment').to_dict()
     
-    prompt = data.get('prompt')
+    prompt = param.get('prompt')
     if not prompt:
         return ApiMessage.fail('please input a prompt').to_dict()
 
     name = str(now_full_int())
-    filename = name+'.0.ply'
-    # asyncio.run(create_3d(data['prompt']))
-    generate_ply(prompt, name)
-    filepath = request.host_url + dir_path +'/'+filename
-    return ApiMessage.success(filepath).to_dict()
+    # asyncio.run(create_3d(prompt, name))
+    text_to_3d(prompt, name)
+    data = {
+        'prompt': prompt,
+        'image': f"{name}.gif",
+        '3dfile': f"{name}.0.ply"
+    }
+    save_record(data)
+    res = {
+        'prompt': prompt,
+        'image': f"{request.host_url}{dir_path}/{name}.gif",
+        '3dfile': f"{request.host_url}{dir_path}/{name}.0.ply"
+    }
+    return ApiMessage.success(res).to_dict()
 
 
-@http_app.route("/v1/shape/get-file", methods=['GET'])
-def shape_get_file():
-    filename = request.args.get('filename', '')
-    #todo 
-    filepath = request.host_url + dir_path +'/'+filename
-    return ApiMessage.success(filepath).to_dict()
+@http_app.route("/v1/shape/get_records", methods=['GET'])
+def get_records():
+    return ApiMessage.success(get_records()).to_dict()
 
-
-@http_app.route("/v1/shape/clear-files", methods=['POST'])
-def shape_clear_files():
-    count = clear_files()
-    return ApiMessage.success(count).to_dict()
-
-
-@http_app.route("/v1/shape/show-files", methods=['GET'])
-def shape_show_files():
-    data = get_files()
-    return ApiMessage.success(data).to_dict()
 

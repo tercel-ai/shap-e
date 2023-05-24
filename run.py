@@ -1,5 +1,5 @@
 import argparse
-from entry import generate_ply
+from entry import text_to_3d
 
 parser = argparse.ArgumentParser(description='Generate 3D')
 parser.add_argument('--prompt', type=str, help='prompt word')
@@ -11,4 +11,4 @@ args = parser.parse_args()
 
 
 if __name__ == '__main__':
-    generate_ply(args.prompt, args.filename, args.number, args.scale)
+    text_to_3d(args.prompt, args.filename, args.number, args.scale)

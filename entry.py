@@ -1,10 +1,12 @@
 import os
+import io
 import time
 import torch
+import json
 from shap_e.diffusion.sample import sample_latents
 from shap_e.diffusion.gaussian_diffusion import diffusion_from_config
 from shap_e.models.download import load_model, load_config
-# from shap_e.util.notebooks import create_pan_cameras, decode_latent_images, gif_widget
+from shap_e.util.notebooks import create_pan_cameras, decode_latent_images, gif_widget
 from shap_e.util.notebooks import decode_latent_mesh
 
 
@@ -24,8 +26,17 @@ dir_path = 'statics'
 class RateLimitExcepiton(Exception):
     pass
 
+def save_image(images, filename):
+    writer = io.BytesIO()
+    images[0].save(
+        writer, format="GIF", save_all=True, append_images=images[1:], duration=100, loop=0
+    )
+    writer.seek(0)
+    with open(f'{dir_path}/{filename}.gif', "wb") as f:
+        f.write(writer.read())
 
-def generate_ply(prompt:str, filename:str, batch_size=1, guidance_scale=15.0):
+
+def text_to_3d(prompt:str, filename:str, batch_size=1, guidance_scale=15.0):
     global last_create_time
     global run_count
 
@@ -50,13 +61,13 @@ def generate_ply(prompt:str, filename:str, batch_size=1, guidance_scale=15.0):
             s_churn=0,
         )
 
-        # render_mode = 'nerf'  # you can change this to 'stf'
-        # size = 64  # this is the size of the renders; higher values take longer to render.
+        render_mode = 'nerf'  # you can change this to 'stf'
+        size = 64  # this is the size of the renders; higher values take longer to render.
 
-        # cameras = create_pan_cameras(size, device)
-        # for i, latent in enumerate(latents):
-        #     images = decode_latent_images(xm, latent, cameras, rendering_mode=render_mode)
-            # display(gif_widget(images))
+        cameras = create_pan_cameras(size, device)
+        for i, latent in enumerate(latents):
+            images = decode_latent_images(xm, latent, cameras, rendering_mode=render_mode)
+            save_image(images, filename)
 
 
         for i, latent in enumerate(latents):
@@ -74,7 +85,7 @@ async def create_3d(prompt:str, filename:str, batch_size=1, guidance_scale=15.0)
     if run_count >= rate_limit:
         return False
     
-    generate_ply(prompt, filename)
+    text_to_3d(prompt, filename)
     return True
 
 
