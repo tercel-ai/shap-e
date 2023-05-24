@@ -2,8 +2,7 @@ import argparse
 from entry import text_to_3d
 
 parser = argparse.ArgumentParser(description='Generate 3D')
-parser.add_argument('--help', action='help', help='show this help message and exit')
-parser.add_argument('--prompt', type=str, help='prompt word')
+parser.add_argument('--prompt', type=str, help='prompt word', default='dog')
 parser.add_argument('--filename', type=str, help='file name', default='exmaple')
 parser.add_argument('--number', type=str, help='3d file numbers', default=1)
 parser.add_argument('--scale', type=str, help='guidance scale', default=15.0)
