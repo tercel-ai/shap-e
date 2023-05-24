@@ -56,13 +56,13 @@ def get_record_by_prompt(prompt:str):
     global webdata
     if not webdata:
         load_records()
-        
+
     i = -1
     res = None
     for index, item in enumerate(webdata):
         if item['prompt'] == prompt:
             i = index
-            res = item
+            res = copy.deepcopy(item)
             break
 
     if i > -1:
