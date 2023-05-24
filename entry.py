@@ -81,14 +81,6 @@ def text_to_3d(prompt:str, filename:str, batch_size=1, guidance_scale=15.0):
         run_count -= 1
 
 
-async def create_3d(prompt:str, filename:str, batch_size=1, guidance_scale=15.0):
-    if run_count >= rate_limit:
-        return False
-    
-    text_to_3d(prompt, filename)
-    return True
-
-
 def can_create():
     clear_files()
     if run_count >= rate_limit:
