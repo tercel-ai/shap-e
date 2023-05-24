@@ -49,7 +49,7 @@ def load_records():
 def get_records():
     if not webdata:
         load_records()
-    return list(webdata)
+    return list(copy.deepcopy(webdata))
 
 
 def get_record_by_prompt(prompt:str):
