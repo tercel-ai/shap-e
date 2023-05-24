@@ -61,13 +61,13 @@ def text_to_3d(prompt:str, filename:str, batch_size=1, guidance_scale=15.0):
             s_churn=0,
         )
 
-        render_mode = 'nerf'  # you can change this to 'stf'
-        size = 64  # this is the size of the renders; higher values take longer to render.
+        # render_mode = 'nerf'  # you can change this to 'stf'
+        # size = 64  # this is the size of the renders; higher values take longer to render.
 
-        cameras = create_pan_cameras(size, device)
-        for i, latent in enumerate(latents):
-            images = decode_latent_images(xm, latent, cameras, rendering_mode=render_mode)
-            save_image(images, filename)
+        # cameras = create_pan_cameras(size, device)
+        # for i, latent in enumerate(latents):
+        #     images = decode_latent_images(xm, latent, cameras, rendering_mode=render_mode)
+        #     save_image(images, filename)
 
 
         for i, latent in enumerate(latents):

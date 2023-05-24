@@ -37,8 +37,8 @@ def shape_create():
     return ApiMessage.success(res).to_dict()
 
 
-@http_app.route("/v1/shape/get_records", methods=['GET'])
-def get_records():
+@http_app.route("/v1/shape/records", methods=['GET'])
+def shape_records():
     data = get_records()
     for d in data:
         file_image = d['file_image']
