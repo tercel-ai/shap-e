@@ -20,6 +20,10 @@ def shape_create():
     if not prompt:
         return ApiMessage.fail('please input a prompt').to_dict()
 
+    prompt = prompt.strip().lower()
+    if not prompt:
+        return ApiMessage.fail('please input a prompt').to_dict()
+    
     d = get_record_by_prompt(prompt)
     if d:
         d['file_image'] = get_file_url(d['file_image'])
