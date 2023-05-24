@@ -25,20 +25,27 @@ def shape_create():
     text_to_3d(prompt, name)
     data = {
         'prompt': prompt,
-        'image': f"{name}.gif",
-        '3dfile': f"{name}.0.ply"
+        'file_image': f"{name}.gif",
+        'file_3d': f"{name}.0.ply"
     }
     save_record(data)
     res = {
         'prompt': prompt,
-        'image': f"{request.host_url}{dir_path}/{name}.gif",
-        '3dfile': f"{request.host_url}{dir_path}/{name}.0.ply"
+        'file_image': f"{request.host_url}{dir_path}/{name}.gif",
+        'file_3d': f"{request.host_url}{dir_path}/{name}.0.ply"
     }
     return ApiMessage.success(res).to_dict()
 
 
 @http_app.route("/v1/shape/get_records", methods=['GET'])
 def get_records():
-    return ApiMessage.success(get_records()).to_dict()
+    data = get_records()
+    for d in data:
+        file_image = d['file_image']
+        d['file_image'] = f"{request.host_url}{dir_path}/{file_image}",
+        file_3d = d['file_3d']
+        d['file_3d'] = f"{request.host_url}{dir_path}/{file_3d}",
+
+    return ApiMessage.success(data).to_dict()
 
 
