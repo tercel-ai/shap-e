@@ -62,11 +62,11 @@ def get_record_by_prompt(prompt:str):
     for index, item in enumerate(webdata):
         if item['prompt'] == prompt:
             i = index
-            res = copy.deepcopy(item)
+            res = item
             break
 
     if i > -1:
         del webdata[i]
         save_record(res)
     
-    return res
+    return copy.deepcopy(res)
