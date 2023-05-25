@@ -82,7 +82,6 @@ def text_to_3d(prompt:str, filename:str, batch_size=1, guidance_scale=15.0):
 
 
 def can_create():
-    clear_files()
     if run_count >= rate_limit:
         return False
 
