@@ -1,5 +1,6 @@
 from flask import Flask, request
 from flask_cors import CORS
+import traceback
 from web.apimsg import ApiMessage
 
 http_app = Flask(__name__, static_folder='statics')
@@ -26,4 +27,6 @@ def before_request():
 
 @http_app.errorhandler(Exception)
 def handle_error(e):
+    print("Error occurred:")
+    traceback.print_exc()
     return ApiMessage.error(500, str(e)).to_dict(), 500
