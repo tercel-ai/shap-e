@@ -12,10 +12,12 @@ def now_full_int():
 
 @http_app.route("/v1/shape/create", methods=['GET','POST'])
 def shape_create():
-    param = json.loads(request.data)
-    if not can_create():
-        return ApiMessage.fail('busy, please wait a moment').to_dict()
-    
+    param = dict()
+    try:
+        param = json.loads(request.data)
+    except:
+        pass
+
     prompt = param.get('prompt')
     if not prompt:
         prompt = request.args.get('prompt')
@@ -26,6 +28,9 @@ def shape_create():
     prompt = prompt.strip().lower()
     if not prompt:
         return ApiMessage.fail('please input a prompt').to_dict()
+    
+    if not can_create():
+        return ApiMessage.fail('busy, please wait a moment').to_dict()
     
     d = get_record_by_prompt(prompt)
     if d:
