@@ -19,6 +19,7 @@ def shape_create():
     prompt = param.get('prompt')
     if not prompt:
         prompt = request.args.get('prompt')
+        param['prompt'] = prompt
     if not prompt:
         return ApiMessage.fail('please input a prompt').to_dict()
 
