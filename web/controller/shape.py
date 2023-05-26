@@ -10,13 +10,15 @@ def now_full_int():
     return int(time.time()*1000000)
 
 
-@http_app.route("/v1/shape/create", methods=['POST'])
+@http_app.route("/v1/shape/create", methods=['GET','POST'])
 def shape_create():
     param = json.loads(request.data)
     if not can_create():
         return ApiMessage.fail('busy, please wait a moment').to_dict()
     
     prompt = param.get('prompt')
+    if not prompt:
+        prompt = request.args.get('prompt')
     if not prompt:
         return ApiMessage.fail('please input a prompt').to_dict()
 
