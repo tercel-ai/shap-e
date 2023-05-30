@@ -4,7 +4,7 @@ import json
 import time
 from entry import can_create, text_to_3d, image_to_3d, dir_path, upload_file, now_full_int
 from web.webdata import save_record, get_records, get_record_by_prompt, get_record_by_image
-
+from log import logger
 
 def str_to_bool(str):
     if str.lower() in ['true', 'yes', '1']:
@@ -37,6 +37,7 @@ def shape_create_by_text():
     d = get_record_by_prompt(prompt)
     if d:
         d.update(show_data(d))
+        logger.debug('from data: %s', prompt)
         return ApiMessage.success(d).to_dict()
     
     name = str(now_full_int())
@@ -79,6 +80,7 @@ def shape_create():
         d = get_record_by_image(f"{dir_path}/{filename}")
         if d:
             d.update(show_data(d))
+            logger.debug('from data: %s', filename)
             return ApiMessage.success(d).to_dict()
         
         image_to_3d(filename, name)
@@ -91,6 +93,7 @@ def shape_create():
         d = get_record_by_prompt(prompt)
         if d:
             d.update(show_data(d))
+            logger.debug('from data: %s', prompt)
             return ApiMessage.success(d).to_dict()
         
         text_to_3d(prompt, name)
