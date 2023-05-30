@@ -2,7 +2,7 @@ from web.app import http_app, request
 from web.apimsg import ApiMessage
 import json
 import time
-from entry import can_create, text_to_3d, image_to_3d, dir_path, upload_file, now_full_int
+from entry import can_create, text_to_3d, image_to_3d, upload_file, now_full_int
 from web.webdata import save_record, get_records, get_record_by_prompt, get_record_by_image
 from log import logger
 
@@ -42,11 +42,11 @@ def shape_create_by_text():
     
     name = str(now_full_int())
     # asyncio.run(create_3d(prompt, name))
-    text_to_3d(prompt, name)
+    file_image, file_3d = text_to_3d(prompt, name)
     data = {
         'prompt': prompt,
-        'file_image': f"{dir_path}/{name}.gif",
-        'file_3d': f"{dir_path}/{name}.0.ply"
+        'file_image': file_image,
+        'file_3d': file_3d[0]
     }
     save_record(data)
     res = show_data(data)
@@ -79,18 +79,18 @@ def shape_create():
     
     data = dict()
     if file:
-        filename = upload_file(file)
-        d = get_record_by_image(f"{dir_path}/{filename}")
+        file_image = upload_file(file)
+        d = get_record_by_image(file_image)
         if d:
             d.update(show_data(d))
-            logger.debug('from data: %s', filename)
+            logger.debug('from data: %s', file_image)
             return ApiMessage.success(d).to_dict()
         
-        image_to_3d(filename, name)
+        file_3d = image_to_3d(file_image, name)
         data = {
             'prompt': prompt,
-            'file_image': f"{dir_path}/{filename}",
-            'file_3d': f"{dir_path}/{name}.0.ply"
+            'file_image': file_image,
+            'file_3d': file_3d[0]
         }
     elif prompt:
         d = get_record_by_prompt(prompt)
@@ -99,11 +99,11 @@ def shape_create():
             logger.debug('from data: %s', prompt)
             return ApiMessage.success(d).to_dict()
         
-        text_to_3d(prompt, name)
+        file_image, file_3d = text_to_3d(prompt, name)
         data = {
             'prompt': prompt,
-            'file_image': f"{dir_path}/{name}.gif",
-            'file_3d': f"{dir_path}/{name}.0.ply"
+            'file_image': file_image,
+            'file_3d': file_3d[0]
         }
 
     if data:

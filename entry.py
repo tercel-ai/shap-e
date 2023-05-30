@@ -41,8 +41,11 @@ def save_image(images, filename):
         writer, format="GIF", save_all=True, append_images=images[1:], duration=100, loop=0
     )
     writer.seek(0)
-    with open(f'{dir_path}/{filename}.gif', "wb") as f:
+    file_path = f'{dir_path}/{filename}.gif'
+    with open(file_path, "wb") as f:
         f.write(writer.read())
+
+    return file_path
 
 
 def text_to_3d(prompt:str, filename:str, batch_size=1, guidance_scale=15.0):
@@ -50,7 +53,8 @@ def text_to_3d(prompt:str, filename:str, batch_size=1, guidance_scale=15.0):
     global run_count
 
     run_count += 1
-
+    file_image = ''
+    file_3d = []
     try:
         last_create_time = time.time()
 
@@ -76,31 +80,34 @@ def text_to_3d(prompt:str, filename:str, batch_size=1, guidance_scale=15.0):
         cameras = create_pan_cameras(size, device)
         for i, latent in enumerate(latents):
             images = decode_latent_images(xm, latent, cameras, rendering_mode=render_mode)
-            save_image(images, filename)
+            file_image = save_image(images, filename)
 
 
         for i, latent in enumerate(latents):
-            with open(f'{dir_path}/{filename}.{i}.ply', 'wb') as f:
+            file_path = f'{dir_path}/{filename}.{i}.ply'
+            file_3d.append(file_path)
+            with open(file_path, 'wb') as f:
                 decode_latent_mesh(xm, latent).tri_mesh().write_ply(f)
     
     except Exception as e:
         logger.error('text_to_3d exception: %s', str(e), exc_info=True, stack_info=True)
-
+        raise e
     finally:
         run_count -= 1
+
+    return file_image, file_3d
 
 def image_to_3d(from_image: str, filename:str, batch_size=1, guidance_scale=3.0):
     global last_create_time
     global run_count
 
     run_count += 1
-
+    file_3d = []
     try:
         last_create_time = time.time()
 
-        filepath = f"{dir_path}/{from_image}"
-        image = load_image(filepath)
-        logger.debug('image_to_3d filepath:%s image:%s', filepath, image)
+        image = load_image(from_image)
+        logger.debug('image_to_3d imagepath:%s image:%s', from_image, image)
 
         latents = sample_latents(
             batch_size=batch_size,
@@ -119,14 +126,18 @@ def image_to_3d(from_image: str, filename:str, batch_size=1, guidance_scale=3.0)
         )
 
         for i, latent in enumerate(latents):
-            with open(f'{dir_path}/{filename}.{i}.ply', 'wb') as f:
+            file_path = f'{dir_path}/{filename}.{i}.ply'
+            file_3d.append(file_path)
+            with open(file_path, 'wb') as f:
                 decode_latent_mesh(xm, latent).tri_mesh().write_ply(f)
     
     except Exception as e:
         logger.error('image_to_3d exception: %s', str(e), exc_info=True, stack_info=True)
-
+        raise e
     finally:
         run_count -= 1
+
+    return file_3d
 
 def can_create():
     if run_count >= rate_limit:
@@ -205,4 +216,4 @@ def upload_file(file):
     new_filename = file_md5 + ext
     file.seek(0)
     file.save(os.path.join(dir_path, new_filename))
-    return new_filename
+    return f'{dir_path}/{new_filename}'
