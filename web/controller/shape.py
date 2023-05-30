@@ -2,11 +2,8 @@ from web.app import http_app, request
 from web.apimsg import ApiMessage
 import json
 import time
-from entry import can_create, text_to_3d, image_to_3d, dir_path, upload_file
+from entry import can_create, text_to_3d, image_to_3d, dir_path, upload_file, now_full_int
 from web.webdata import save_record, get_records, get_record_by_prompt, get_record_by_image
-
-def now_full_int():
-    return int(time.time()*1000000)
 
 
 @http_app.route("/v1/shape/create_by_text", methods=['GET','POST'])

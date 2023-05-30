@@ -31,6 +31,8 @@ class RateLimitExcepiton(Exception):
 class ParamExcepiton(Exception):
     pass
 
+def now_full_int():
+    return int(time.time()*1000000)
 
 def save_image(images, filename):
     writer = io.BytesIO()
@@ -189,14 +191,14 @@ def upload_file(file):
     if ext.lower() not in ['.bmp','.png','.jpg','.jpeg']:
         raise ParamExcepiton('Illegal file')
     
-    md5 = hashlib.md5()
-    while True:
-        data = file.read(8192)
-        if not data:
-            break
-        md5.update(data)
-    file_md5 = md5.hexdigest()
+    # md5 = hashlib.md5()
+    # while True:
+    #     data = file.read(8192)
+    #     if not data:
+    #         break
+    #     md5.update(data)
+    # file_md5 = md5.hexdigest()
 
-    new_filename = file_md5 + ext
-    file.save(os.path.join(dir_path, new_filename))
-    return new_filename
+    # new_filename = file_md5 + ext
+    file.save(os.path.join(dir_path, file.filename))
+    return file.filename
