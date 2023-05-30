@@ -80,6 +80,7 @@ def shape_create():
     data = dict()
     if file:
         file_image = upload_file(file)
+        time.sleep(0.1)
         d = get_record_by_image(file_image)
         if d:
             d.update(show_data(d))
