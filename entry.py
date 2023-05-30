@@ -12,6 +12,7 @@ from shap_e.util.notebooks import decode_latent_mesh
 from shap_e.util.image_util import load_image
 from log import logger
 
+logger.debug('cuda is available: %s', torch.cuda.is_available())
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 xm = load_model('transmitter', device=device)
@@ -56,6 +57,7 @@ def text_to_3d(prompt:str, filename:str, batch_size=1, guidance_scale=15.0):
     file_3d = []
     try:
         model = load_model('text300M', device=device)
+        logger.debug('text_to_3d model:%s', model)
         last_create_time = time.time()
         
         latents = sample_latents(
@@ -105,6 +107,7 @@ def image_to_3d(from_image: str, filename:str, batch_size=1, guidance_scale=3.0)
     file_3d = []
     try:
         model = load_model('image300M', device=device)
+        logger.debug('image_to_3d model:%s', model)
         last_create_time = time.time()
         image = load_image(from_image)
         logger.debug('image_to_3d imagepath:%s image:%s', from_image, image)
