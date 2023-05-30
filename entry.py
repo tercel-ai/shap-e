@@ -8,6 +8,7 @@ from shap_e.diffusion.gaussian_diffusion import diffusion_from_config
 from shap_e.models.download import load_model, load_config
 from shap_e.util.notebooks import create_pan_cameras, decode_latent_images, gif_widget
 from shap_e.util.notebooks import decode_latent_mesh
+from shap_e.util.image_util import load_image
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -75,11 +76,47 @@ def text_to_3d(prompt:str, filename:str, batch_size=1, guidance_scale=15.0):
                 decode_latent_mesh(xm, latent).tri_mesh().write_ply(f)
     
     except Exception as e:
-        print('generate 3d exception: '+str(e))
+        print('text_to_3d exception: '+str(e))
 
     finally:
         run_count -= 1
 
+def image_to_3d(from_image: str, filename:str, batch_size=1, guidance_scale=3.0):
+    global last_create_time
+    global run_count
+
+    run_count += 1
+
+    try:
+        last_create_time = time.time()
+
+        image = load_image(f"dir_path/{from_image}")
+
+        latents = sample_latents(
+            batch_size=batch_size,
+            model=model,
+            diffusion=diffusion,
+            guidance_scale=guidance_scale,
+            model_kwargs=dict(images=[image] * batch_size),
+            progress=True,
+            clip_denoised=True,
+            use_fp16=True,
+            use_karras=True,
+            karras_steps=64,
+            sigma_min=1e-3,
+            sigma_max=160,
+            s_churn=0,
+        )
+
+        for i, latent in enumerate(latents):
+            with open(f'{dir_path}/{filename}.{i}.ply', 'wb') as f:
+                decode_latent_mesh(xm, latent).tri_mesh().write_ply(f)
+    
+    except Exception as e:
+        print('image_to_3d exception: '+str(e))
+
+    finally:
+        run_count -= 1
 
 def can_create():
     if run_count >= rate_limit:

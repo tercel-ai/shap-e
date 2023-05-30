@@ -2,15 +2,20 @@ from web.app import http_app, request
 from web.apimsg import ApiMessage
 import json
 import time
+import os
+import hashlib
 import asyncio
-from entry import can_create, text_to_3d, clear_files, get_files, dir_path
-from web.webdata import save_record, get_records, get_record_by_prompt
+from entry import can_create, text_to_3d, image_to_3d, dir_path
+from web.webdata import save_record, get_records, get_record_by_prompt, get_record_by_image
 
 def now_full_int():
     return int(time.time()*1000000)
 
+class ParamExcepiton(Exception):
+    pass
 
-@http_app.route("/v1/shape/create", methods=['GET','POST'])
+
+@http_app.route("/v1/shape/create_by_text", methods=['GET','POST'])
 def shape_create():
     param = dict()
     try:
@@ -34,8 +39,7 @@ def shape_create():
     
     d = get_record_by_prompt(prompt)
     if d:
-        d['file_image'] = get_file_url(d['file_image'])
-        d['file_3d'] = get_file_url(d['file_3d'])
+        d.update(show_data(d))
         return ApiMessage.success(d).to_dict()
     
     name = str(now_full_int())
@@ -47,20 +51,68 @@ def shape_create():
         'file_3d': f"{dir_path}/{name}.0.ply"
     }
     save_record(data)
-    res = {
-        'prompt': prompt,
-        'file_image': f"{request.host_url}{dir_path}/{name}.gif",
-        'file_3d': f"{request.host_url}{dir_path}/{name}.0.ply"
-    }
+    res = show_data(data)
     return ApiMessage.success(res).to_dict()
+
+
+@http_app.route("/v1/shape/create", methods=['GET','POST'])
+def shape_create():
+    prompt = request.form['prompt']
+    file = request.files['image']
+
+    if not prompt and not file:
+        return ApiMessage.fail('please input a prompt or upload a picture').to_dict()
+
+    if not prompt:
+        prompt = ''
+    prompt = prompt.strip().lower()
+    
+    if not can_create():
+        return ApiMessage.fail('busy, please wait a moment').to_dict()
+    
+
+    name = str(now_full_int())
+    
+    data = dict()
+    if file:
+        filename = upload_file(file)
+        d = get_record_by_image(f"{dir_path}/{filename}")
+        if d:
+            d.update(show_data(d))
+            return ApiMessage.success(d).to_dict()
+        
+        image_to_3d(filename, name)
+        data = {
+            'prompt': prompt,
+            'file_image': f"{dir_path}/{filename}",
+            'file_3d': f"{dir_path}/{name}.0.ply"
+        }
+    elif prompt:
+        d = get_record_by_prompt(prompt)
+        if d:
+            d.update(show_data(d))
+            return ApiMessage.success(d).to_dict()
+        
+        text_to_3d(prompt, name)
+        data = {
+            'prompt': prompt,
+            'file_image': f"{dir_path}/{name}.gif",
+            'file_3d': f"{dir_path}/{name}.0.ply"
+        }
+
+    if data:
+        save_record(data)
+        res = show_data(data)
+        return ApiMessage.success(res).to_dict()
+    else:
+        return ApiMessage.fail().to_dict()
 
 
 @http_app.route("/v1/shape/records", methods=['GET'])
 def shape_records():
     data = get_records()
     for d in data:
-        d['file_image'] = get_file_url(d['file_image'])
-        d['file_3d'] = get_file_url(d['file_3d'])
+        d.update(show_data(d))
 
     return ApiMessage.success(data).to_dict()
 
@@ -68,3 +120,27 @@ def shape_records():
 def get_file_url(filename:str):
     return f"{request.host_url}{filename}"
 
+def show_data(data: dict):
+    res = {
+        'prompt': data.get('prompt', ''),
+        'file_image': get_file_url(data.get('file_image', '')),
+        'file_3d': get_file_url(data.get('file_3d', ''))
+    }
+    return res
+
+def upload_file(file):
+    ext = os.path.splitext(file.filename)[1]
+    if ext.lower() not in ['.bmp','.png','.jpg','.jpeg']:
+        raise ParamExcepiton('Illegal file')
+    
+    md5 = hashlib.md5()
+    while True:
+        data = file.read(8192)
+        if not data:
+            break
+        md5.update(data)
+    file_md5 = md5.hexdigest()
+
+    new_filename = file_md5 + ext
+    file.save(os.path.join(dir_path, new_filename))
+    return new_filename

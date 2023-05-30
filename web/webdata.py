@@ -52,7 +52,7 @@ def get_records():
     return list(copy.deepcopy(webdata))
 
 
-def get_record_by_prompt(prompt:str):
+def get_record_by_key_val(key:str, val:str):
     global webdata
     if not webdata:
         load_records()
@@ -60,7 +60,7 @@ def get_record_by_prompt(prompt:str):
     i = -1
     res = None
     for index, item in enumerate(webdata):
-        if item['prompt'] == prompt:
+        if item[key] == val:
             i = index
             res = item
             break
@@ -70,3 +70,10 @@ def get_record_by_prompt(prompt:str):
         save_record(res)
     
     return copy.deepcopy(res)
+
+def get_record_by_prompt(prompt:str):
+    return get_record_by_key_val('prompt', prompt)
+
+
+def get_record_by_image(filepath:str):
+    return get_record_by_key_val('file_image', filepath)
