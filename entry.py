@@ -10,6 +10,7 @@ from shap_e.models.download import load_model, load_config
 from shap_e.util.notebooks import create_pan_cameras, decode_latent_images, gif_widget
 from shap_e.util.notebooks import decode_latent_mesh
 from shap_e.util.image_util import load_image
+from log import logger
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -83,7 +84,7 @@ def text_to_3d(prompt:str, filename:str, batch_size=1, guidance_scale=15.0):
                 decode_latent_mesh(xm, latent).tri_mesh().write_ply(f)
     
     except Exception as e:
-        print('text_to_3d exception: '+str(e))
+        logger.error('text_to_3d exception: %s', str(e), exc_info=True, stack_info=True)
 
     finally:
         run_count -= 1
@@ -99,7 +100,7 @@ def image_to_3d(from_image: str, filename:str, batch_size=1, guidance_scale=3.0)
 
         filepath = f"{dir_path}/{from_image}"
         image = load_image(filepath)
-        print('image_to_3d filepath:'+filepath, image)
+        logger.debug('image_to_3d filepath:%s image:%s', filepath, image)
 
         latents = sample_latents(
             batch_size=batch_size,
@@ -122,7 +123,7 @@ def image_to_3d(from_image: str, filename:str, batch_size=1, guidance_scale=3.0)
                 decode_latent_mesh(xm, latent).tri_mesh().write_ply(f)
     
     except Exception as e:
-        print('image_to_3d exception: '+str(e))
+        logger.error('image_to_3d exception: %s', str(e), exc_info=True, stack_info=True)
 
     finally:
         run_count -= 1
