@@ -15,7 +15,6 @@ from log import logger
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 xm = load_model('transmitter', device=device)
-model = load_model('text300M', device=device)
 diffusion = diffusion_from_config(load_config('diffusion'))
 
 expire_time = int(os.environ.get('SHAPE_FILE_EXPIRE_TIME', 900))
@@ -56,8 +55,9 @@ def text_to_3d(prompt:str, filename:str, batch_size=1, guidance_scale=15.0):
     file_image = ''
     file_3d = []
     try:
+        model = load_model('text300M', device=device)
         last_create_time = time.time()
-
+        
         latents = sample_latents(
             batch_size=batch_size,
             model=model,
@@ -104,8 +104,8 @@ def image_to_3d(from_image: str, filename:str, batch_size=1, guidance_scale=3.0)
     run_count += 1
     file_3d = []
     try:
+        model = load_model('image300M', device=device)
         last_create_time = time.time()
-
         image = load_image(from_image)
         logger.debug('image_to_3d imagepath:%s image:%s', from_image, image)
 
