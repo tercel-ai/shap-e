@@ -13,10 +13,10 @@ args = parser.parse_args()
 logger.debug('args:%s', args)
 
 if __name__ == '__main__':
-    logger.debug('args.modle: %s' ,args.modle)
-    if args.modle == 'image':
+    logger.debug('args.model: %s' ,args.model)
+    if args.model == 'image':
         image_to_3d(args.value, args.filename, args.number, args.scal)
-    elif args.modle == 'text':
+    elif args.model == 'text':
         text_to_3d(args.value, args.filename, args.number, args.scale)
     else:
         logger.info('invalid model')
