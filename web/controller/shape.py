@@ -58,6 +58,9 @@ def shape_create():
     prompt = request.form.get('prompt')
     file = request.files.get('image')
 
+    logger.debug('shape_create prompt:%s', prompt)
+    logger.debug('shape_create file:%s', file)
+
     if not prompt and not file:
         return ApiMessage.fail('please input a prompt or upload a picture').to_dict()
 
