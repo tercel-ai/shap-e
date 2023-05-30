@@ -57,8 +57,8 @@ def shape_create_by_text():
 
 @http_app.route("/v1/shape/create", methods=['GET','POST'])
 def shape_create():
-    prompt = request.form['prompt']
-    file = request.files['image']
+    prompt = request.form.get('prompt')
+    file = request.files.get('image')
 
     if not prompt and not file:
         return ApiMessage.fail('please input a prompt or upload a picture').to_dict()
