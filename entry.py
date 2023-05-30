@@ -97,7 +97,7 @@ def image_to_3d(from_image: str, filename:str, batch_size=1, guidance_scale=3.0)
     try:
         last_create_time = time.time()
 
-        image = load_image(f"dir_path/{from_image}")
+        image = load_image(f"{dir_path}/{from_image}")
 
         latents = sample_latents(
             batch_size=batch_size,
