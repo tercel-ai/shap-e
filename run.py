@@ -15,8 +15,8 @@ logger.debug('args:%s', args)
 if __name__ == '__main__':
     logger.debug('args.model: %s' ,args.model)
     if args.model == 'image':
-        image_to_3d(args.value, args.filename, args.number, args.scale)
+        image_to_3d(args.value, args.filename, int(args.number), float(args.scale))
     elif args.model == 'text':
-        text_to_3d(args.value, args.filename, args.number, args.scale)
+        text_to_3d(args.value, args.filename, int(args.number), float(args.scale))
     else:
         logger.info('invalid model')
