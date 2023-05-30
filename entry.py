@@ -161,7 +161,7 @@ def delete_file(filepath):
         os.remove(filepath)
         return True
     except OSError as e:
-        print(f'can not delete {filepath}: {e.strerror}')
+        logger.error(f'can not delete {filepath}: {e.strerror}')
         return False
 
     
