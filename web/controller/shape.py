@@ -6,6 +6,12 @@ from entry import can_create, text_to_3d, image_to_3d, dir_path, upload_file, no
 from web.webdata import save_record, get_records, get_record_by_prompt, get_record_by_image
 
 
+def str_to_bool(str):
+    if str.lower() in ['true', 'yes', '1']:
+        return True
+    return False
+
+
 @http_app.route("/v1/shape/create_by_text", methods=['GET','POST'])
 def shape_create_by_text():
     param = dict()
@@ -104,7 +110,8 @@ def shape_create():
 
 @http_app.route("/v1/shape/records", methods=['GET'])
 def shape_records():
-    data = get_records()
+    force = str_to_bool(request.args.get('force', ''))
+    data = get_records(force)
     for d in data:
         d.update(show_data(d))
 

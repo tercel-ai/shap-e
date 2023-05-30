@@ -46,8 +46,8 @@ def load_records():
         with open('.webdata.json', 'w') as f:
             f.write(json_str)
 
-def get_records():
-    if not webdata:
+def get_records(force=False):
+    if not webdata or force:
         load_records()
     return list(copy.deepcopy(webdata))
 
