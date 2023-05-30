@@ -16,7 +16,7 @@ class ParamExcepiton(Exception):
 
 
 @http_app.route("/v1/shape/create_by_text", methods=['GET','POST'])
-def shape_create():
+def shape_create_by_text():
     param = dict()
     try:
         param = json.loads(request.data)
