@@ -19,6 +19,7 @@ guidance_scale = 3.0
 
 # To get the best result, you should remove the background and show only the object of interest to the model.
 image = load_image("shap_e/examples/example_data/corgi.png")
+logger.debug('image:%s', image)
 
 latents = sample_latents(
     batch_size=batch_size,
