@@ -63,6 +63,9 @@ def shape_create():
     if not prompt and not file:
         return ApiMessage.fail('please input a prompt or upload a picture').to_dict()
 
+    if file and not file.filename:
+        return ApiMessage.fail('please upload a picture').to_dict()
+
     if not prompt:
         prompt = ''
     prompt = prompt.strip().lower()
