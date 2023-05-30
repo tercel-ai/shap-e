@@ -3,6 +3,7 @@ import io
 import time
 import torch
 import json
+import hashlib
 from shap_e.diffusion.sample import sample_latents
 from shap_e.diffusion.gaussian_diffusion import diffusion_from_config
 from shap_e.models.download import load_model, load_config
@@ -26,6 +27,10 @@ dir_path = 'statics'
 
 class RateLimitExcepiton(Exception):
     pass
+
+class ParamExcepiton(Exception):
+    pass
+
 
 def save_image(images, filename):
     writer = io.BytesIO()
@@ -177,3 +182,21 @@ def count_files():
             count += 1
 
     return count
+
+
+def upload_file(file):
+    ext = os.path.splitext(file.filename)[1]
+    if ext.lower() not in ['.bmp','.png','.jpg','.jpeg']:
+        raise ParamExcepiton('Illegal file')
+    
+    md5 = hashlib.md5()
+    while True:
+        data = file.read(8192)
+        if not data:
+            break
+        md5.update(data)
+    file_md5 = md5.hexdigest()
+
+    new_filename = file_md5 + ext
+    file.save(os.path.join(dir_path, new_filename))
+    return new_filename

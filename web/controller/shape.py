@@ -2,17 +2,11 @@ from web.app import http_app, request
 from web.apimsg import ApiMessage
 import json
 import time
-import os
-import hashlib
-import asyncio
-from entry import can_create, text_to_3d, image_to_3d, dir_path
+from entry import can_create, text_to_3d, image_to_3d, dir_path, upload_file
 from web.webdata import save_record, get_records, get_record_by_prompt, get_record_by_image
 
 def now_full_int():
     return int(time.time()*1000000)
-
-class ParamExcepiton(Exception):
-    pass
 
 
 @http_app.route("/v1/shape/create_by_text", methods=['GET','POST'])
@@ -130,20 +124,3 @@ def show_data(data: dict):
         'file_3d': get_file_url(data.get('file_3d', ''))
     }
     return res
-
-def upload_file(file):
-    ext = os.path.splitext(file.filename)[1]
-    if ext.lower() not in ['.bmp','.png','.jpg','.jpeg']:
-        raise ParamExcepiton('Illegal file')
-    
-    md5 = hashlib.md5()
-    while True:
-        data = file.read(8192)
-        if not data:
-            break
-        md5.update(data)
-    file_md5 = md5.hexdigest()
-
-    new_filename = file_md5 + ext
-    file.save(os.path.join(dir_path, new_filename))
-    return new_filename
