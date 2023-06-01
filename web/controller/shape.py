@@ -146,9 +146,6 @@ def get_file_url(filename:str):
     return f"{request.host_url}{filename}"
 
 def show_data(data: dict):
-    res = {
-        'prompt': data.get('prompt', ''),
-        'file_image': get_file_url(data.get('file_image', '')),
-        'file_3d': get_file_url(data.get('file_3d', ''))
-    }
-    return res
+    data['file_image'] = get_file_url(data.get('file_image', ''))
+    data['file_3d'] = get_file_url(data.get('file_3d', ''))
+    return data
