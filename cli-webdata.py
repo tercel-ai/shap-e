@@ -1,5 +1,5 @@
 import argparse
-from web.webdata import webdata, save, md5
+from web.webdata import get_records, save, md5
 from log import logger
 
 parser = argparse.ArgumentParser(description='Generate 3D')
@@ -11,7 +11,7 @@ args = parser.parse_args()
 logger.debug('args:%s', args)
 
 def reset():
-    global webdata
+    webdata = get_records()
     for index, item in enumerate(webdata):
         if 'id' not in item:
             if not item.get('prompt'):
