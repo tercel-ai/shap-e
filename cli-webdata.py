@@ -17,8 +17,10 @@ def reset():
             if not item.get('prompt'):
                 arr = item['file_image'].split('/')
                 item['id'] = arr[len(arr)-1].split('.')[0]
+                item['from'] = 'image'
             else:
                 item['id'] = md5(item['prompt'])
+                item['from'] = 'text'
     
     save(list(webdata))
 
