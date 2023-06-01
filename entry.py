@@ -219,4 +219,4 @@ def upload_file(file):
     new_filename = file_md5 + ext
     file.seek(0)
     file.save(os.path.join(dir_path, new_filename))
-    return f'{dir_path}/{new_filename}'
+    return f'{dir_path}/{new_filename}', file_md5

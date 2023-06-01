@@ -2,8 +2,9 @@ from web.app import http_app, request
 from web.apimsg import ApiMessage
 import json
 import time
+import hashlib
 from entry import can_create, text_to_3d, image_to_3d, upload_file, now_full_int
-from web.webdata import save_record, get_records, get_record_by_prompt, get_record_by_image
+from web.webdata import save_record, get_records, get_record_by_id, md5
 from log import logger
 
 def str_to_bool(str):
@@ -34,16 +35,18 @@ def shape_create_by_text():
     if not can_create():
         return ApiMessage.fail('busy, please wait a moment').to_dict()
     
-    d = get_record_by_prompt(prompt)
+    id = md5(prompt)
+    d = get_record_by_id(id, True)
     if d:
         d.update(show_data(d))
-        logger.debug('from data: %s', prompt)
         return ApiMessage.success(d).to_dict()
     
     name = str(now_full_int())
     # asyncio.run(create_3d(prompt, name))
     file_image, file_3d = text_to_3d(prompt, name)
     data = {
+        'id': id,
+        'from': 'text',
         'prompt': prompt,
         'file_image': file_image,
         'file_3d': file_3d[0]
@@ -79,29 +82,33 @@ def shape_create():
     
     data = dict()
     if file:
-        file_image = upload_file(file)
+        file_image, file_name = upload_file(file)
         time.sleep(0.1)
-        d = get_record_by_image(file_image)
+        id = file_name
+        d = get_record_by_id(id, True)
         if d:
             d.update(show_data(d))
-            logger.debug('from data: %s', file_image)
             return ApiMessage.success(d).to_dict()
         
         file_3d = image_to_3d(file_image, name)
         data = {
+            'id':id,
+            'from': 'image',
             'prompt': prompt,
             'file_image': file_image,
             'file_3d': file_3d[0]
         }
     elif prompt:
-        d = get_record_by_prompt(prompt)
+        id = md5(prompt)
+        d = get_record_by_id(id, True)
         if d:
             d.update(show_data(d))
-            logger.debug('from data: %s', prompt)
             return ApiMessage.success(d).to_dict()
         
         file_image, file_3d = text_to_3d(prompt, name)
         data = {
+            'id': id,
+            'from': 'text',
             'prompt': prompt,
             'file_image': file_image,
             'file_3d': file_3d[0]
@@ -123,6 +130,16 @@ def shape_records():
         d.update(show_data(d))
 
     return ApiMessage.success(data).to_dict()
+
+
+@http_app.route("/v1/shape/record", methods=['GET'])
+def shape_record():
+    d = get_record_by_id(request.args.get('id', ''))
+    if d:
+        d.update(show_data(d))
+        return ApiMessage.success(d).to_dict()
+    else:
+        return ApiMessage.fail().to_dict()
 
 
 def get_file_url(filename:str):
