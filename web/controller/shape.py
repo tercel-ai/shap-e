@@ -4,6 +4,7 @@ import json
 import time
 import hashlib
 import os
+import copy
 from entry import can_create, text_to_3d, image_to_3d, upload_file, now_full_int, delete_file
 from web.webdata import save_record, get_records, get_record_by_id, md5
 from log import logger
@@ -167,6 +168,7 @@ def get_file_url(filename:str):
     return f"{request.host_url}{filename}"
 
 def show_data(data: dict):
-    data['file_image'] = get_file_url(data.get('file_image', ''))
-    data['file_3d'] = get_file_url(data.get('file_3d', ''))
-    return data
+    res = copy.deepcopy(data)
+    res['file_image'] = get_file_url(data.get('file_image', ''))
+    res['file_3d'] = get_file_url(data.get('file_3d', ''))
+    return res
