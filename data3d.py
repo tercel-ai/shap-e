@@ -37,7 +37,7 @@ def save(_webdata: list):
     except Exception as e:
         raise WebDataExcepiton(str(e))
     
-def save_record(data:dict):
+def add_record(data:dict):
     data['created_at'] = now_utc_str()
     global webdata
     try:
@@ -52,16 +52,21 @@ def save_record(data:dict):
         raise WebDataExcepiton(str(e))
 
 
-def load_records():
+def load_records(force=False):
     global webdata
     try:
         with open('.webdata.json', 'r') as f:
             json_str = f.read()
         webdata = deque(json.loads(json_str))
     except Exception as e:
-        save([])
+        if force:
+            webdata = []
+            save(webdata)
+        else:
+            raise e
+    return webdata
 
-def get_records(force=False):
+def get_records(force=True):
     if not webdata or force:
         load_records()
     return list(copy.deepcopy(webdata))
@@ -69,8 +74,7 @@ def get_records(force=False):
 
 def get_record_by_key_val(key:str, val:str, update:bool=False):
     global webdata
-    if not webdata:
-        load_records()
+    load_records()
 
     i = -1
     res = None
@@ -82,7 +86,7 @@ def get_record_by_key_val(key:str, val:str, update:bool=False):
 
     if i > -1 and update:
         del webdata[i]
-        save_record(res)
+        add_record(res)
     
     return copy.deepcopy(res)
 

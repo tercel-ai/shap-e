@@ -3,4 +3,5 @@ __pycache__/
 *.egg-info/
 venv/
 statics/
-.webdata.json
+.data3d.json
+.datatask.json

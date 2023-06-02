@@ -6,11 +6,11 @@ import hashlib
 import os
 import copy
 from entry import can_create, text_to_3d, image_to_3d, upload_file, now_full_int, delete_file, ParamExcepiton
-from web.webdata import save_record, get_records, get_record_by_id, md5
+from data3d import add_record, get_records, get_record_by_id, md5
+from datatask import add_task_data
 from log import logger
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-import asyncio
 
 def get_remote_ip():
     remote_addr = get_remote_address()
@@ -32,22 +32,6 @@ def str_to_bool(str):
         return True
     return False
 
-async def create_3d(data: dict):
-    name = str(now_full_int())
-    if data['from'] == 'text':
-        file_image, file_3d = text_to_3d(data['prompt'], name)
-        data['file_image'] = file_image
-        data['file_3d'] = file_3d[0]
-        save_record(data)
-    elif data['from'] == 'text':
-        file_image, file_3d = image_to_3d(data['file_image'], name)
-        delete_file(data['file_image'])
-        data['file_image'] = file_image
-        data['file_3d'] = file_3d[0]
-        save_record(data)
-    else:
-        raise ParamExcepiton('unknown from')
-    
 
 @http_app.route("/v1/shape/create_by_text", methods=['GET','POST'])
 @limiter.limit(limit_time)
@@ -87,7 +71,7 @@ def shape_create_by_text():
         'file_image': file_image,
         'file_3d': file_3d[0]
     }
-    save_record(data)
+    add_record(data)
     res = show_data(data)
     return ApiMessage.success(res).to_dict()
 
@@ -153,7 +137,7 @@ def shape_create_sync():
         }
 
     if data:
-        save_record(data)
+        add_record(data)
         res = show_data(data)
         return ApiMessage.success(res).to_dict()
     else:
@@ -162,7 +146,7 @@ def shape_create_sync():
 
 @http_app.route("/v1/shape/create", methods=['POST'])
 @limiter.limit(limit_time)
-async def shape_create():
+def shape_create():
     prompt = request.form.get('prompt')
     file = request.files.get('image')
 
@@ -200,7 +184,7 @@ async def shape_create():
             'file_image': from_image,
             'file_3d': ''
         }
-        create_3d(data)
+        add_task_data(data)
         return ApiMessage.success(data).to_dict()
         
     elif prompt:
@@ -217,7 +201,7 @@ async def shape_create():
             'file_image': '',
             'file_3d': ''
         }
-        create_3d(data)
+        add_task_data(data)
         return ApiMessage.success(data).to_dict()
 
     else:
