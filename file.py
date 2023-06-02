@@ -8,7 +8,7 @@ class FileExcepiton(Exception):
 
 def upload_file(file):
     ext = os.path.splitext(file.filename)[1]
-    if ext.lower() not in ['.bmp','.png','.jpg','.jpeg']:
+    if ext.lower() not in ['.bmp','.png','.jpg','.jpeg', 'avif']:
         raise FileExcepiton('Illegal file')
     
     md5 = hashlib.md5()
