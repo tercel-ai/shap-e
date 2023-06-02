@@ -35,6 +35,7 @@ setup(
         "PyJWT",
         "flask",
         "flask_cors",
+        "flask_limiter",
         "clip @ git+https://github.com/openai/CLIP.git",
     ],
     author="OpenAI",

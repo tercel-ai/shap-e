@@ -3,9 +3,19 @@ from web.apimsg import ApiMessage
 import json
 import time
 import hashlib
+import os
 from entry import can_create, text_to_3d, image_to_3d, upload_file, now_full_int, delete_file
 from web.webdata import save_record, get_records, get_record_by_id, md5
 from log import logger
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
+limit_time = os.environ.get('SHAPE_CREATE_LIMIT_TIME', "5 per day")
+limiter = Limiter(
+    http_app,
+    key_func=get_remote_address,
+    default_limits=[limit_time]
+)
 
 def str_to_bool(str):
     if str.lower() in ['true', 'yes', '1']:
@@ -14,6 +24,7 @@ def str_to_bool(str):
 
 
 @http_app.route("/v1/shape/create_by_text", methods=['GET','POST'])
+@limiter.limit(limit_time)
 def shape_create_by_text():
     param = dict()
     try:
@@ -57,6 +68,7 @@ def shape_create_by_text():
 
 
 @http_app.route("/v1/shape/create", methods=['GET','POST'])
+@limiter.limit(limit_time)
 def shape_create():
     prompt = request.form.get('prompt')
     file = request.files.get('image')
