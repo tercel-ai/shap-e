@@ -40,6 +40,7 @@ def save(_data3d: list):
 def add_record(data:dict):
     data['created_at'] = now_utc_str()
     global data3d
+    data3d = load_records()
     try:
         if len(data3d) > max_records:
             d = data3d.pop()
