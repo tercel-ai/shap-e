@@ -12,11 +12,15 @@ def create_3d(data: dict):
         data['file_3d'] = file_3d[0]
         add_record(data)
     elif data['from'] == 'image':
-        file_image, file_3d = image_to_3d(data['file_image'], name)
-        delete_file(data['file_image'])
-        data['file_image'] = file_image
-        data['file_3d'] = file_3d[0]
-        add_record(data)
+        try:
+            file_image, file_3d = image_to_3d(data['file_image'], name)
+            delete_file(data['file_image'])
+            data['file_image'] = file_image
+            data['file_3d'] = file_3d[0]
+            add_record(data)
+        except Exception as e:
+            delete_file(data['file_image'])
+            logger.error('image_to_3d except')
     else:
         logger.error('unknown from data:%s', data)
 
@@ -30,8 +34,11 @@ def main():
                 continue;
             
             start = time.time()
-            create_3d(d)
-            logger.debug('create 3d:%s, time:%s', d, time.time()-start)
+            try:
+                create_3d(d)
+                logger.debug('create 3d:%s, time:%s', d, time.time()-start)
+            except:
+                pass
             time.sleep(0.05)
 
         clear_task_data()
