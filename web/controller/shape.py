@@ -13,9 +13,10 @@ from flask_limiter.util import get_remote_address
 def get_remote_ip():
     remote_addr = get_remote_address()
     x_real_ip = request.headers.get('X-Real-IP')
+    logger.debug('remote address:%s, ip:%s', remote_addr, x_real_ip)
     if x_real_ip:
         remote_addr = x_real_ip
-    logger.debug('remote address:%s', remote_addr)
+    
     return remote_addr
 
 limit_time = os.environ.get('SHAPE_CREATE_LIMIT_TIME', "5 per day")
