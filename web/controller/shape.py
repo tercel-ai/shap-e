@@ -5,11 +5,12 @@ import time
 import hashlib
 import os
 import copy
-from entry import can_create, text_to_3d, image_to_3d, upload_file, now_full_int, delete_file
+from entry import can_create, text_to_3d, image_to_3d, upload_file, now_full_int, delete_file, ParamExcepiton
 from web.webdata import save_record, get_records, get_record_by_id, md5
 from log import logger
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+import asyncio
 
 def get_remote_ip():
     remote_addr = get_remote_address()
@@ -31,6 +32,21 @@ def str_to_bool(str):
         return True
     return False
 
+async def create_3d(data: dict):
+    name = str(now_full_int())
+    if data['from'] == 'text':
+        file_image, file_3d = text_to_3d(data['prompt'], name)
+        data['file_image'] = file_image
+        data['file_3d'] = file_3d[0]
+        save_record(data)
+    elif data['from'] == 'text':
+        file_image, file_3d = image_to_3d(data['file_image'], name)
+        delete_file(data['file_image'])
+        data['file_image'] = file_image
+        data['file_3d'] = file_3d[0]
+        save_record(data)
+    else:
+        raise ParamExcepiton('unknown from')
 
 @http_app.route("/v1/shape/create_by_text", methods=['GET','POST'])
 @limiter.limit(limit_time)
@@ -76,9 +92,9 @@ def shape_create_by_text():
     return ApiMessage.success(res).to_dict()
 
 
-@http_app.route("/v1/shape/create", methods=['GET','POST'])
+@http_app.route("/v1/shape/create_sync", methods=['POST'])
 @limiter.limit(limit_time)
-def shape_create():
+def shape_create_sync():
     prompt = request.form.get('prompt')
     file = request.files.get('image')
 
@@ -140,6 +156,70 @@ def shape_create():
         save_record(data)
         res = show_data(data)
         return ApiMessage.success(res).to_dict()
+    else:
+        return ApiMessage.fail().to_dict()
+    
+
+@http_app.route("/v1/shape/create", methods=['POST'])
+@limiter.limit(limit_time)
+def shape_create():
+    prompt = request.form.get('prompt')
+    file = request.files.get('image')
+
+    logger.debug('shape_create prompt:%s', prompt)
+    logger.debug('shape_create file:%s', file)
+
+    if not prompt and not file:
+        return ApiMessage.fail('please input a prompt or upload a picture').to_dict()
+
+    if file and not file.filename:
+        return ApiMessage.fail('please upload a picture').to_dict()
+
+    if not prompt:
+        prompt = ''
+    prompt = prompt.strip().lower()
+    
+    if not can_create():
+        return ApiMessage.fail('busy, please wait a moment').to_dict()
+    
+
+    data = dict()
+    if file:
+        from_image, file_name = upload_file(file)
+        time.sleep(0.1)
+        id = file_name
+        d = get_record_by_id(id, True)
+        if d:
+            d.update(show_data(d))
+            return ApiMessage.success(d).to_dict()
+        
+        data = {
+            'id':id,
+            'from': 'image',
+            'prompt': prompt,
+            'file_image': from_image,
+            'file_3d': ''
+        }
+        asyncio.run(create_3d(data))
+        return ApiMessage.success(data).to_dict()
+        
+    elif prompt:
+        id = md5(prompt)
+        d = get_record_by_id(id, True)
+        if d:
+            d.update(show_data(d))
+            return ApiMessage.success(d).to_dict()
+        
+        data = {
+            'id': id,
+            'from': 'text',
+            'prompt': prompt,
+            'file_image': '',
+            'file_3d': ''
+        }
+        asyncio.run(create_3d(data))
+        return ApiMessage.success(data).to_dict()
+
     else:
         return ApiMessage.fail().to_dict()
 
