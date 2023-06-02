@@ -13,8 +13,6 @@ from flask_limiter.util import get_remote_address
 def get_remote_ip():
     remote_addr = get_remote_address()
     x_real_ip = request.headers.get('X-Real-IP')
-    request_remote_addr = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
-    logger.debug('remote address:%s, ip:%s, request_remote_addr:%s', remote_addr, x_real_ip, request_remote_addr)
     if x_real_ip:
         remote_addr = x_real_ip
     
