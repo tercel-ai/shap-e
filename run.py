@@ -11,7 +11,7 @@ def create_3d(data: dict):
         data['file_image'] = file_image
         data['file_3d'] = file_3d[0]
         add_record(data)
-    elif data['from'] == 'text':
+    elif data['from'] == 'image':
         file_image, file_3d = image_to_3d(data['file_image'], name)
         delete_file(data['file_image'])
         data['file_image'] = file_image
