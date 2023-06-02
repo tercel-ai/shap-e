@@ -48,9 +48,6 @@ async def create_3d(data: dict):
     else:
         raise ParamExcepiton('unknown from')
     
-def run_create_3d(data: dict):
-    loop = asyncio.get_event_loop()
-    loop.create_task(create_3d(data))
 
 @http_app.route("/v1/shape/create_by_text", methods=['GET','POST'])
 @limiter.limit(limit_time)
@@ -82,7 +79,6 @@ def shape_create_by_text():
         return ApiMessage.success(d).to_dict()
     
     name = str(now_full_int())
-    # asyncio.run(create_3d(prompt, name))
     file_image, file_3d = text_to_3d(prompt, name)
     data = {
         'id': id,
@@ -166,7 +162,7 @@ def shape_create_sync():
 
 @http_app.route("/v1/shape/create", methods=['POST'])
 @limiter.limit(limit_time)
-def shape_create():
+async def shape_create():
     prompt = request.form.get('prompt')
     file = request.files.get('image')
 
@@ -204,7 +200,7 @@ def shape_create():
             'file_image': from_image,
             'file_3d': ''
         }
-        run_create_3d(data)
+        create_3d(data)
         return ApiMessage.success(data).to_dict()
         
     elif prompt:
@@ -221,7 +217,7 @@ def shape_create():
             'file_image': '',
             'file_3d': ''
         }
-        run_create_3d(data)
+        create_3d(data)
         return ApiMessage.success(data).to_dict()
 
     else:

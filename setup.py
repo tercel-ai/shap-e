@@ -36,6 +36,7 @@ setup(
         "flask",
         "flask_cors",
         "flask_limiter",
+        "flask[async]"
         "clip @ git+https://github.com/openai/CLIP.git",
     ],
     author="OpenAI",
