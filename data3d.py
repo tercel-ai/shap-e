@@ -98,5 +98,5 @@ def get_record_by_prompt(prompt:str, update:bool=False):
 def get_record_by_image(filepath:str, update:bool=False):
     return get_record_by_key_val('file_image', filepath, update)
 
-def get_record_by_id(id:str, update:bool=False):
-    return get_record_by_key_val('id', id, update)
+def get_record_by_id(_id:str, update:bool=False):
+    return get_record_by_key_val('id', _id, update)

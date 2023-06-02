@@ -10,6 +10,7 @@ from shap_e.models.download import load_model, load_config
 from shap_e.util.notebooks import create_pan_cameras, decode_latent_images, gif_widget
 from shap_e.util.notebooks import decode_latent_mesh
 from shap_e.util.image_util import load_image
+from file import dir_path
 from log import logger
 
 logger.debug('cuda is available: %s', torch.cuda.is_available())
@@ -24,7 +25,6 @@ rate_limit = int(os.environ.get('SHAPE_FILE_RATE_LIMIT', 1))
 
 last_create_time = time.time()
 run_count = 0
-dir_path = 'statics'
 
 class RateLimitExcepiton(Exception):
     pass
@@ -210,22 +210,3 @@ def count_files():
             count += 1
 
     return count
-
-
-def upload_file(file):
-    ext = os.path.splitext(file.filename)[1]
-    if ext.lower() not in ['.bmp','.png','.jpg','.jpeg']:
-        raise ParamExcepiton('Illegal file')
-    
-    md5 = hashlib.md5()
-    while True:
-        data = file.read(8192)
-        if not data:
-            break
-        md5.update(data)
-    file_md5 = md5.hexdigest()
-
-    new_filename = file_md5 + ext
-    file.seek(0)
-    file.save(os.path.join(dir_path, new_filename))
-    return f'{dir_path}/{new_filename}', file_md5
