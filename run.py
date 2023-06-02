@@ -26,6 +26,9 @@ def main():
         data = load_task_data(True)
         while len(data) > 0:
             d = data.pop()
+            if not d:
+                continue;
+            
             start = time.time()
             create_3d(d)
             logger.debug('create 3d:%s, time:%s', d, time.time()-start)
