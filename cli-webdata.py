@@ -1,5 +1,5 @@
 import argparse
-from web.webdata import get_records, save, md5
+from data3d import get_records, save, md5
 from log import logger
 
 parser = argparse.ArgumentParser(description='Generate 3D')
