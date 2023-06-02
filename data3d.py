@@ -5,12 +5,12 @@ import hashlib
 from datetime import datetime, timezone
 from collections import deque
 
-max_records = int(os.environ.get('SHAPE_WEBDATA_MAX', 50))
+max_records = int(os.environ.get('SHAPE_DATA3D_MAX', 50))
 
-webdata = deque([]);
+data3d = deque([]);
 
 
-class WebDataExcepiton(Exception):
+class Data3DExcepiton(Exception):
     pass
 
 def now_utc_str():
@@ -29,63 +29,63 @@ def delete_file(filepath):
     except OSError as e:
         return False
     
-def save(_webdata: list):
+def save(_data3d: list):
     try:
-        json_str = json.dumps(_webdata)
-        with open('.webdata.json', 'w') as f:
+        json_str = json.dumps(_data3d)
+        with open('.data3d.json', 'w') as f:
             f.write(json_str)
     except Exception as e:
-        raise WebDataExcepiton(str(e))
+        raise Data3DExcepiton(str(e))
     
 def add_record(data:dict):
     data['created_at'] = now_utc_str()
-    global webdata
+    global data3d
     try:
-        if len(webdata) > max_records:
-            d = webdata.pop()
+        if len(data3d) > max_records:
+            d = data3d.pop()
             delete_file(d['file_image'])
             delete_file(d['file_3d'])
 
-        webdata.appendleft(data)
-        save(list(webdata))
+        data3d.appendleft(data)
+        save(list(data3d))
     except Exception as e:
-        raise WebDataExcepiton(str(e))
+        raise Data3DExcepiton(str(e))
 
 
 def load_records(force=False):
-    global webdata
+    global data3d
     try:
-        with open('.webdata.json', 'r') as f:
+        with open('.data3d.json', 'r') as f:
             json_str = f.read()
-        webdata = deque(json.loads(json_str))
+        data3d = deque(json.loads(json_str))
     except Exception as e:
         if force:
-            webdata = []
-            save(webdata)
+            data3d = []
+            save(data3d)
         else:
             raise e
-    return webdata
+    return data3d
 
 def get_records(force=True):
-    if not webdata or force:
+    if not data3d or force:
         load_records()
-    return list(copy.deepcopy(webdata))
+    return list(copy.deepcopy(data3d))
 
 
 def get_record_by_key_val(key:str, val:str, update:bool=False):
-    global webdata
-    webdata = load_records()
+    global data3d
+    data3d = load_records()
 
     i = -1
     res = None
-    for index, item in enumerate(webdata):
+    for index, item in enumerate(data3d):
         if item[key] == val:
             i = index
             res = item
             break
 
     if i > -1 and update:
-        del webdata[i]
+        del data3d[i]
         add_record(res)
     
     return copy.deepcopy(res)
