@@ -18,6 +18,6 @@ class ApiMessage(object):
         return ApiMessage(0, 'success', data)
     
     @staticmethod
-    def fail(data=False):
-        return ApiMessage(1, 'fail', data)
+    def fail(msg='fail', data=False):
+        return ApiMessage(1, msg, data)
          

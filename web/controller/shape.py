@@ -205,7 +205,7 @@ def shape_create():
         return ApiMessage.success(data).to_dict()
 
     else:
-        return ApiMessage.fail().to_dict()
+        return ApiMessage.fail('invalid parameter').to_dict()
 
 
 @http_app.route("/v1/shape/records", methods=['GET'])
@@ -232,7 +232,7 @@ def shape_record():
     if d:
         return ApiMessage.success(d).to_dict()
     else:
-        return ApiMessage.fail().to_dict()
+        return ApiMessage.fail('invalid id').to_dict()
 
 
 def get_file_url(filename:str):
