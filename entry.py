@@ -104,6 +104,7 @@ def image_to_3d(from_image: str, filename:str, batch_size=1, guidance_scale=3.0)
     global run_count
 
     run_count += 1
+    file_image = ''
     file_3d = []
     try:
         model = load_model('image300M', device=device)
@@ -128,6 +129,14 @@ def image_to_3d(from_image: str, filename:str, batch_size=1, guidance_scale=3.0)
             s_churn=0,
         )
 
+        render_mode = 'nerf'  # you can change this to 'stf'
+        size = 128  # this is the size of the renders; higher values take longer to render.
+
+        cameras = create_pan_cameras(size, device)
+        for i, latent in enumerate(latents):
+            images = decode_latent_images(xm, latent, cameras, rendering_mode=render_mode)
+            file_image = save_image(images, filename)
+
         for i, latent in enumerate(latents):
             file_path = f'{dir_path}/{filename}.{i}.ply'
             file_3d.append(file_path)
@@ -140,7 +149,7 @@ def image_to_3d(from_image: str, filename:str, batch_size=1, guidance_scale=3.0)
     finally:
         run_count -= 1
 
-    return file_3d
+    return file_image, file_3d
 
 def can_create():
     if run_count >= rate_limit:

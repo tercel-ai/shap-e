@@ -3,7 +3,7 @@ from web.apimsg import ApiMessage
 import json
 import time
 import hashlib
-from entry import can_create, text_to_3d, image_to_3d, upload_file, now_full_int
+from entry import can_create, text_to_3d, image_to_3d, upload_file, now_full_int, delete_file
 from web.webdata import save_record, get_records, get_record_by_id, md5
 from log import logger
 
@@ -82,7 +82,7 @@ def shape_create():
     
     data = dict()
     if file:
-        file_image, file_name = upload_file(file)
+        from_image, file_name = upload_file(file)
         time.sleep(0.1)
         id = file_name
         d = get_record_by_id(id, True)
@@ -90,7 +90,8 @@ def shape_create():
             d.update(show_data(d))
             return ApiMessage.success(d).to_dict()
         
-        file_3d = image_to_3d(file_image, name)
+        file_image, file_3d = image_to_3d(from_image, name)
+        delete_file(from_image)
         data = {
             'id':id,
             'from': 'image',
