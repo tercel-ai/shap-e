@@ -74,7 +74,7 @@ def get_records(force=True):
 
 def get_record_by_key_val(key:str, val:str, update:bool=False):
     global webdata
-    load_records()
+    webdata = load_records()
 
     i = -1
     res = None
