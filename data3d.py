@@ -87,7 +87,8 @@ def get_record_by_key_val(key:str, val:str, update:bool=False):
 
     if i > -1 and update:
         del data3d[i]
-        add_record(res)
+        data3d.appendleft(res)
+        save(list(data3d))
     
     return copy.deepcopy(res)
 
