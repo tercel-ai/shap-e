@@ -18,7 +18,7 @@ def create_3d(data: dict):
         data['file_3d'] = file_3d[0]
         add_record(data)
     else:
-        raise ParamExcepiton('unknown from')
+        logger.error('unknown from data:%s', data)
 
 def main():
     logger.info('run create 3d ...')
