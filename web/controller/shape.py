@@ -25,8 +25,7 @@ limit_time = os.environ.get('SHAPE_CREATE_LIMIT_TIME', "5 per day")
 limiter = Limiter(
     app=http_app,
     key_func=get_remote_ip,
-    default_limits=[limit_time],
-    exempt_routes=["/v1/shape/records", "/v1/shape/record"]
+    default_limits=[limit_time]
 )
 
 def str_to_bool(str):
@@ -210,6 +209,7 @@ def shape_create():
 
 
 @http_app.route("/v1/shape/records", methods=['GET'])
+@limiter.exempt
 def shape_records():
     force = str_to_bool(request.args.get('force', ''))
     data = get_records(force)
@@ -220,6 +220,7 @@ def shape_records():
 
 
 @http_app.route("/v1/shape/record", methods=['GET'])
+@limiter.exempt
 def shape_record():
     _id = request.args.get('id', '')
     d = get_record_by_id(_id)
