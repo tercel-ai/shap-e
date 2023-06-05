@@ -21,7 +21,7 @@ def get_remote_ip():
     
     return remote_addr
 
-limit_time = os.environ.get('SHAPE_CREATE_LIMIT_TIME', "5 per day")
+limit_time = os.environ.get('SHAPE_CREATE_LIMIT_TIME', "1 per day")
 limiter = Limiter(
     app=http_app,
     key_func=get_remote_ip,
