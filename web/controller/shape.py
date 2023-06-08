@@ -18,7 +18,7 @@ def get_remote_ip():
     x_real_ip = request.headers.get('X-Real-IP')
     if x_real_ip:
         remote_addr = x_real_ip
-    
+    logger.debug('client ip address:%s', remote_addr)
     return remote_addr
 
 limit_time = os.environ.get('SHAPE_CREATE_LIMIT_TIME', "1 per day")
