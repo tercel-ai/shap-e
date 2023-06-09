@@ -113,5 +113,7 @@ def del_record_by_id(_id:str):
             break
 
     if i > -1:
+        delete_file(data3d[i]['file_image'])
+        delete_file(data3d[i]['file_3d'])
         del data3d[i]
         save(list(data3d))
