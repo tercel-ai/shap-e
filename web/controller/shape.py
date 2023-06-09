@@ -6,7 +6,7 @@ import hashlib
 import os
 import copy
 # from entry import can_create, text_to_3d, image_to_3d, now_full_int, delete_file, ParamExcepiton
-from data3d import add_record, get_records, get_record_by_id, md5, del_record_by_id
+from data3d import add_record, get_records, get_record_by_id, md5, del_record_by_id, clear_invalid_records
 from datatask import add_task_data, get_task_data_by_id, len_task_data
 from file import upload_file
 from log import logger
@@ -195,6 +195,8 @@ def shape_create():
     if not check_limit():
         return ApiMessage.fail('Request Limit Exceeded. You have reached your maximum allowed requests today.').to_dict()
 
+    clear_invalid_records()
+    
     data = dict()
     if file:
         from_image, file_name = upload_file(file)
@@ -240,6 +242,10 @@ def shape_create():
 def shape_records():
     force = str_to_bool(request.args.get('force', ''))
     data = get_records(force)
+    for i in range(len(data)):
+        if 'errmsg' in data[i]:
+            del data[i]
+
     for d in data:
         d.update(show_data(d))
 

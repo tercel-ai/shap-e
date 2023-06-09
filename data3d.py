@@ -117,3 +117,17 @@ def del_record_by_id(_id:str):
         delete_file(data3d[i]['file_3d'])
         del data3d[i]
         save(list(data3d))
+
+def clear_invalid_records():
+    global data3d
+    data3d = load_records()
+    found = False
+    for i in range(len(data3d)):
+        if 'errmsg' in data3d[i]:
+            found = True
+            delete_file(data3d[i]['file_image'])
+            delete_file(data3d[i]['file_3d'])
+            del data3d[i]
+
+    if found:
+        save(list(data3d))
