@@ -10,7 +10,6 @@ from data3d import add_record, get_records, get_record_by_id, md5
 from datatask import add_task_data, get_task_data_by_id, len_task_data
 from file import upload_file
 from log import logger
-from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
 def get_remote_ip():
@@ -21,12 +20,36 @@ def get_remote_ip():
     logger.debug('client ip address:%s', remote_addr)
     return remote_addr
 
-limit_time = os.environ.get('SHAPE_CREATE_LIMIT_TIME', "1 per day")
-limiter = Limiter(
-    app=http_app,
-    key_func=get_remote_ip,
-    default_limits=[limit_time]
-)
+limit_time = int(os.environ.get('SHAPE_CREATE_LIMIT_TIME', 86400))
+
+created_records = dict()
+
+
+def check_expired(ip):
+    global created_records
+    created_time = created_records.get(ip)
+    if created_time and created_time + limit_time > time.time():
+        return False
+    
+    created_records[ip] = time.time()
+    return True
+
+def clear_expired():
+    global created_records
+    ips = list(created_records.keys())
+    for ip in ips:
+        if check_expired(ip):
+            del created_records[ip]
+
+
+def check_limit():
+    try:
+        clear_expired()
+    except:
+        pass
+
+    return check_expired(get_remote_ip())
+
 
 def str_to_bool(str):
     if str.lower() in ['true', 'yes', '1']:
@@ -35,7 +58,6 @@ def str_to_bool(str):
 
 
 # @http_app.route("/v1/shape/create_by_text", methods=['GET','POST'])
-# @limiter.limit(limit_time)
 # def shape_create_by_text():
 #     param = dict()
 #     try:
@@ -78,7 +100,6 @@ def str_to_bool(str):
 
 
 # @http_app.route("/v1/shape/create_sync", methods=['POST'])
-# @limiter.limit(limit_time)
 # def shape_create_sync():
 #     prompt = request.form.get('prompt')
 #     file = request.files.get('image')
@@ -145,13 +166,12 @@ def str_to_bool(str):
     
 
 @http_app.route("/v1/shape/create", methods=['POST'])
-@limiter.limit(limit_time)
 def shape_create():
     prompt = request.form.get('prompt')
     file = request.files.get('image')
 
-    logger.debug('shape_create prompt:%s', prompt)
-    logger.debug('shape_create file:%s', file)
+    # logger.debug('shape_create prompt:%s', prompt)
+    # logger.debug('shape_create file:%s', file)
 
     if not prompt and not file:
         return ApiMessage.fail('please input a prompt or upload a picture').to_dict()
@@ -166,6 +186,8 @@ def shape_create():
     if len_task_data() > 0:
         return ApiMessage.fail('Service is busy, please try again later').to_dict()
     
+    if not check_limit():
+        return ApiMessage.fail('Request Limit Exceeded. You have reached your maximum allowed requests today.').to_dict()
 
     data = dict()
     if file:
@@ -209,7 +231,6 @@ def shape_create():
 
 
 @http_app.route("/v1/shape/records", methods=['GET'])
-@limiter.exempt
 def shape_records():
     force = str_to_bool(request.args.get('force', ''))
     data = get_records(force)
@@ -220,7 +241,6 @@ def shape_records():
 
 
 @http_app.route("/v1/shape/record", methods=['GET'])
-@limiter.exempt
 def shape_record():
     _id = request.args.get('id', '')
     d = get_record_by_id(_id)
