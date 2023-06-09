@@ -10,6 +10,7 @@ from data3d import add_record, get_records, get_record_by_id, md5
 from datatask import add_task_data, get_task_data_by_id, len_task_data
 from file import upload_file
 from log import logger
+from config import config
 from flask_limiter.util import get_remote_address
 
 def get_remote_ip():
@@ -20,7 +21,8 @@ def get_remote_ip():
     logger.debug('client ip address:%s', remote_addr)
     return remote_addr
 
-limit_time = int(os.environ.get('SHAPE_CREATE_LIMIT_TIME', 86400))
+limit_time = config.get('SHAPE_CREATE_LIMIT_TIME', 86400)
+white_list = config.get('SHAPE_CREATE_WHITE_LIST', '')
 
 created_records = dict()
 
@@ -47,8 +49,12 @@ def check_limit():
         clear_expired()
     except:
         pass
-
-    return check_expired(get_remote_ip())
+    
+    ip = get_remote_ip()
+    if ip in white_list.split(','):
+        return True
+    
+    return check_expired(ip)
 
 
 def str_to_bool(str):
