@@ -101,3 +101,17 @@ def get_record_by_image(filepath:str, update:bool=False):
 
 def get_record_by_id(_id:str, update:bool=False):
     return get_record_by_key_val('id', _id, update)
+
+def del_record_by_id(_id:str):
+    global data3d
+    data3d = load_records()
+
+    i = -1
+    for index, item in enumerate(data3d):
+        if item['id'] == _id:
+            i = index
+            break
+
+    if i > -1:
+        del data3d[i]
+        save(list(data3d))

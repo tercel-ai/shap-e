@@ -6,7 +6,7 @@ import hashlib
 import os
 import copy
 # from entry import can_create, text_to_3d, image_to_3d, now_full_int, delete_file, ParamExcepiton
-from data3d import add_record, get_records, get_record_by_id, md5
+from data3d import add_record, get_records, get_record_by_id, md5, del_record_by_id
 from datatask import add_task_data, get_task_data_by_id, len_task_data
 from file import upload_file
 from log import logger
@@ -251,6 +251,10 @@ def shape_record():
     _id = request.args.get('id', '')
     d = get_record_by_id(_id)
     if d:
+        if 'errmsg' in d:
+            del_record_by_id(d['id'])
+            return ApiMessage.fail(d['errmsg']).to_dict()
+        
         d.update(show_data(d))
         return ApiMessage.success(d).to_dict()
     

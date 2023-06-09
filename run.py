@@ -10,7 +10,14 @@ def create_3d(data: dict):
         file_image, file_3d = text_to_3d(data['prompt'], name)
         data['file_image'] = file_image
         data['file_3d'] = file_3d[0]
-        add_record(data)
+        try:
+            add_record(data)
+        except Exception as e:
+            errmsg = 'text_to_3d except: ' + str(e)
+            data['errmsg'] = errmsg
+            add_record(data)
+            logger.error(errmsg)
+
     elif data['from'] == 'image':
         try:
             file_image, file_3d = image_to_3d(data['file_image'], name)
@@ -20,7 +27,10 @@ def create_3d(data: dict):
             add_record(data)
         except Exception as e:
             delete_file(data['file_image'])
-            logger.error('image_to_3d except')
+            errmsg = 'image_to_3d except: ' + str(e)
+            data['errmsg'] = errmsg
+            add_record(data)
+            logger.error(errmsg)
     else:
         logger.error('unknown from data:%s', data)
 
