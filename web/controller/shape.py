@@ -164,7 +164,7 @@ def shape_create():
     prompt = prompt.strip().lower()
     
     if len_task_data() > 0:
-        return ApiMessage.fail('busy, please wait a moment').to_dict()
+        return ApiMessage.fail('Service is busy, please try again later').to_dict()
     
 
     data = dict()
