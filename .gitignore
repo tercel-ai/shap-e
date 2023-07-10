@@ -5,4 +5,5 @@ venv/
 statics/
 .data3d.json
 .datatask.json
+.datatop.json
 .config.json

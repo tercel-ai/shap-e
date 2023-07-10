@@ -8,6 +8,7 @@ import copy
 # from entry import can_create, text_to_3d, image_to_3d, now_full_int, delete_file, ParamExcepiton
 from data3d import add_record, get_records, get_record_by_id, md5, del_record_by_id, clear_invalid_records
 from datatask import add_task_data, get_task_data_by_id, len_task_data
+from datatop import get_records as tops
 from file import upload_file
 from log import logger
 from config import config
@@ -269,6 +270,20 @@ def shape_record():
         return ApiMessage.success(d).to_dict()
     else:
         return ApiMessage.fail('invalid id').to_dict()
+    
+
+@http_app.route("/v1/shape/tops", methods=['GET'])
+def shape_tops():
+    force = str_to_bool(request.args.get('force', ''))
+    data = tops(force)
+    for i in range(len(data)):
+        if 'errmsg' in data[i]:
+            del data[i]
+
+    for d in data:
+        d.update(show_data(d))
+
+    return ApiMessage.success(data).to_dict()
 
 
 def get_file_url(filename:str):
