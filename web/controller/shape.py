@@ -13,6 +13,7 @@ from file import upload_file
 from log import logger
 from config import config
 from flask_limiter.util import get_remote_address
+from api import api_text_to_3d
 
 def get_remote_ip():
     remote_addr = get_remote_address()
@@ -24,6 +25,7 @@ def get_remote_ip():
 
 limit_time = config.get('SHAPE_CREATE_LIMIT_TIME', 86400)
 white_list = config.get('SHAPE_CREATE_WHITE_LIST', '')
+create_by = config.get('SHAPE_CREATE_BY')
 
 created_records = dict()
 
@@ -64,46 +66,39 @@ def str_to_bool(str):
     return False
 
 
-# @http_app.route("/v1/shape/create_by_text", methods=['GET','POST'])
-# def shape_create_by_text():
-#     param = dict()
-#     try:
-#         param = json.loads(request.data)
-#     except:
-#         pass
+@http_app.route("/v1/shape/create_by_text", methods=['GET','POST'])
+def shape_create_by_text():
+    if not create_by:
+        return ApiMessage.fail('disabled').to_dict()
+    
+    param = dict()
+    try:
+        param = json.loads(request.data)
+    except:
+        pass
 
-#     prompt = param.get('prompt')
-#     if not prompt:
-#         prompt = request.args.get('prompt')
-#         param['prompt'] = prompt
-#     if not prompt:
-#         return ApiMessage.fail('please input a prompt').to_dict()
+    prompt = param.get('prompt')
+    if not prompt:
+        prompt = request.args.get('prompt')
+        param['prompt'] = prompt
+    if not prompt:
+        return ApiMessage.fail('please input a prompt').to_dict()
 
-#     prompt = prompt.strip().lower()
-#     if not prompt:
-#         return ApiMessage.fail('please input a prompt').to_dict()
+    prompt = prompt.strip().lower()
+    if not prompt:
+        return ApiMessage.fail('please input a prompt').to_dict()
     
-#     if not can_create():
-#         return ApiMessage.fail('busy, please wait a moment').to_dict()
+    _id = md5(prompt)
+    d = get_record_by_id(_id, True)
+    if d:
+        d.update(show_data(d))
+        return ApiMessage.success(d).to_dict()
     
-#     _id = md5(prompt)
-#     d = get_record_by_id(_id, True)
-#     if d:
-#         d.update(show_data(d))
-#         return ApiMessage.success(d).to_dict()
-    
-#     name = str(now_full_int())
-#     file_image, file_3d = text_to_3d(prompt, name)
-#     data = {
-#         'id': _id,
-#         'from': 'text',
-#         'prompt': prompt,
-#         'file_image': file_image,
-#         'file_3d': file_3d[0]
-#     }
-#     add_record(data)
-#     res = show_data(data)
-#     return ApiMessage.success(res).to_dict()
+    data = api_text_to_3d(prompt)
+    data['id'] = _id
+    add_record(data)
+    res = show_data(data)
+    return ApiMessage.success(res).to_dict()
 
 
 # @http_app.route("/v1/shape/create_sync", methods=['POST'])
@@ -287,6 +282,11 @@ def shape_tops():
 
 
 def get_file_url(filename:str):
+    if not filename:
+        filename = ""
+    if filename.find('http://') == 0 or filename.find('https://') == 0:
+        return filename
+    
     return f"{request.host_url}{filename}"
 
 def show_data(data: dict):

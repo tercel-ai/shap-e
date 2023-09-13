@@ -4,6 +4,7 @@ import os
 import hashlib
 from datetime import datetime, timezone
 from collections import deque
+from file import delete_file
 
 max_records = int(os.environ.get('SHAPE_DATA3D_MAX', 50))
 
@@ -21,13 +22,6 @@ def md5(val: str):
     m = hashlib.md5()
     m.update(val.encode('utf-8'))
     return m.hexdigest()
-
-def delete_file(filepath):
-    try:
-        os.remove(filepath)
-        return True
-    except OSError as e:
-        return False
     
 def save(_data3d: list):
     try:

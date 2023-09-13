@@ -1,5 +1,6 @@
 import os
 import hashlib
+from log import logger
 
 dir_path = 'statics'
 
@@ -23,3 +24,13 @@ def upload_file(file):
     file.seek(0)
     file.save(os.path.join(dir_path, new_filename))
     return f'{dir_path}/{new_filename}', file_md5
+
+def delete_file(filepath):
+    if not filepath:
+        return False
+    try:
+        os.remove(filepath)
+        return True
+    except OSError as e:
+        logger.error(f'can not delete {filepath}: {e.strerror}')
+        return False

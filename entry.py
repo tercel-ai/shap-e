@@ -10,8 +10,9 @@ from shap_e.models.download import load_model, load_config
 from shap_e.util.notebooks import create_pan_cameras, decode_latent_images, gif_widget
 from shap_e.util.notebooks import decode_latent_mesh
 from shap_e.util.image_util import load_image
-from file import dir_path
+from file import dir_path, delete_file
 from log import logger
+from config import config
 
 logger.debug('cuda is available: %s', torch.cuda.is_available())
 
@@ -25,6 +26,8 @@ rate_limit = int(os.environ.get('SHAPE_FILE_RATE_LIMIT', 1))
 
 last_create_time = time.time()
 run_count = 0
+is_create_image = config.get('SHAPE_IS_CREATE_IMAGE', True)
+
 
 class RateLimitExcepiton(Exception):
     pass
@@ -76,13 +79,14 @@ def text_to_3d(prompt:str, filename:str, batch_size=1, guidance_scale=15.0):
             s_churn=0,
         )
 
-        render_mode = 'nerf'  # you can change this to 'stf'
-        size = 128  # this is the size of the renders; higher values take longer to render.
+        if is_create_image:
+            render_mode = 'nerf'  # you can change this to 'stf'
+            size = 128  # this is the size of the renders; higher values take longer to render.
 
-        cameras = create_pan_cameras(size, device)
-        for i, latent in enumerate(latents):
-            images = decode_latent_images(xm, latent, cameras, rendering_mode=render_mode)
-            file_image = save_image(images, filename)
+            cameras = create_pan_cameras(size, device)
+            for i, latent in enumerate(latents):
+                images = decode_latent_images(xm, latent, cameras, rendering_mode=render_mode)
+                file_image = save_image(images, filename)
 
 
         for i, latent in enumerate(latents):
@@ -129,13 +133,14 @@ def image_to_3d(from_image: str, filename:str, batch_size=1, guidance_scale=3.0)
             s_churn=0,
         )
 
-        render_mode = 'nerf'  # you can change this to 'stf'
-        size = 128  # this is the size of the renders; higher values take longer to render.
+        if is_create_image:
+            render_mode = 'nerf'  # you can change this to 'stf'
+            size = 128  # this is the size of the renders; higher values take longer to render.
 
-        cameras = create_pan_cameras(size, device)
-        for i, latent in enumerate(latents):
-            images = decode_latent_images(xm, latent, cameras, rendering_mode=render_mode)
-            file_image = save_image(images, filename)
+            cameras = create_pan_cameras(size, device)
+            for i, latent in enumerate(latents):
+                images = decode_latent_images(xm, latent, cameras, rendering_mode=render_mode)
+                file_image = save_image(images, filename)
 
         for i, latent in enumerate(latents):
             file_path = f'{dir_path}/{filename}.{i}.ply'
@@ -178,14 +183,6 @@ def clear_files():
             if res:
                 count += 1
     return count
-
-def delete_file(filepath):
-    try:
-        os.remove(filepath)
-        return True
-    except OSError as e:
-        logger.error(f'can not delete {filepath}: {e.strerror}')
-        return False
 
     
 def get_files():
