@@ -283,7 +283,7 @@ def shape_tops():
 
 def get_file_url(filename:str):
     if not filename:
-        filename = ""
+        return ""
     if filename.find('http://') == 0 or filename.find('https://') == 0:
         return filename
     
